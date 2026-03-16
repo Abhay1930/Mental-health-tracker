@@ -1,0 +1,17 @@
+# OS files
+.DS_Store
+Thumb.db
+
+# Node
+node_modules/
+dist/
+build/
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Other
+.vscode/
+.idea/
