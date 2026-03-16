@@ -17,6 +17,7 @@ import Button from '../components/common/Button';
 import Container from '../components/common/Container';
 import MoodInsights from '../components/dashboard/MoodInsights';
 import WellnessScore from '../components/dashboard/WellnessScore';
+import MoodPrediction from '../components/dashboard/MoodPrediction';
 import { useAuth } from '../context/AuthContext';
 import { moodApi, exercisesApi, resourcesApi, journalApi, goalsApi } from '../utils/api';
 
@@ -396,6 +397,7 @@ const Dashboard = () => {
         </WelcomeSection>
 
         <WellnessScore />
+        <MoodPrediction />
 
         <DashboardGrid>
           <MainColumn>

@@ -12,6 +12,10 @@ build/
 *.log
 npm-debug.log*
 
+# Python / ML
+__pycache__/
+ml-service/data/*.csv
+
 # Other
 .vscode/
 .idea/
