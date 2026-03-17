@@ -4,8 +4,7 @@ import styled from 'styled-components';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Container from '../components/common/Container';
-import { postsApi } from '../utils/api';
-import axios from 'axios';
+import api, { postsApi } from '../utils/api';
 
 const ProfileContainer = styled.div`
   padding: var(--spacing-lg) 0;
@@ -204,7 +203,7 @@ const UserProfile = () => {
       try {
         setLoading(true);
 
-        const userResponse = await axios.get(`/api/auth/user/${userId}`);
+        const userResponse = await api.get(`/auth/user/${userId}`);
         setUser(userResponse.data);
 
         const postsResponse = await postsApi.getPostsByUser(userId);

@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -23,11 +23,7 @@ export const AuthProvider = ({ children }) => {
   const fetchCurrentUser = async (token) => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/auth/user', {
-        headers: {
-          'x-auth-token': token
-        }
-      });
+      const response = await api.get('/auth/user');
       setCurrentUser(response.data);
       setError(null);
     } catch (err) {
@@ -42,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setLoading(true);
-      const response = await axios.post('/api/auth/login', {
+      const response = await api.post('/auth/login', {
         email,
         password
       });
@@ -64,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setLoading(true);
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await api.post('/auth/register', userData);
 
       const { token } = response.data;
       localStorage.setItem('token', token);

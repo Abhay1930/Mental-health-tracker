@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const ChatContainer = styled.div`
   position: fixed;
@@ -141,7 +141,7 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/ai/chat', { 
+      const response = await api.post('/ai/chat', { 
         message: userMessage 
       });
       
