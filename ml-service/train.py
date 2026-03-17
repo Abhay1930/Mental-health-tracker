@@ -8,8 +8,8 @@ import joblib
 import os
 
 def train_model():
-    # Load data
-    data_path = 'ml-service/data/synthetic_mood_data.csv'
+    base = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(base, 'data', 'synthetic_mood_data.csv')
     if not os.path.exists(data_path):
         print("Data file not found. Run data_gen.py first.")
         return
@@ -57,8 +57,10 @@ def train_model():
         'model': rf,
         'features': features
     }
-    joblib.dump(model_data, 'ml-service/models/mood_model.joblib')
-    print("\nModel saved to ml-service/models/mood_model.joblib")
+    os.makedirs(os.path.join(base, 'models'), exist_ok=True)
+    model_path = os.path.join(base, 'models', 'mood_model.joblib')
+    joblib.dump(model_data, model_path)
+    print(f"\nModel saved to {model_path}")
 
 if __name__ == "__main__":
     train_model()

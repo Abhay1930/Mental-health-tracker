@@ -90,8 +90,8 @@ const VerificationBadge = styled.div`
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: ${props => props.verified ? 'rgba(76, 217, 100, 0.1)' : 'rgba(255, 204, 0, 0.1)'};
-  color: ${props => props.verified ? 'var(--success-color)' : 'var(--warning-color)'};
+  background-color: ${props => props.$verified ? 'rgba(76, 217, 100, 0.1)' : 'rgba(255, 204, 0, 0.1)'};
+  color: ${props => props.$verified ? 'var(--success-color)' : 'var(--warning-color)'};
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-small);
   margin-bottom: var(--spacing-md);
@@ -174,7 +174,7 @@ const ResourceDetail = () => {
         <Card>
           <ResourceCategory>{resource.category}</ResourceCategory>
           
-          <VerificationBadge verified={resource.isVerified}>
+          <VerificationBadge $verified={resource.isVerified}>
             <i className={`fas fa-${resource.isVerified ? 'check-circle' : 'exclamation-triangle'}`}></i>
             {resource.isVerified ? 'Verified Resource' : 'Unverified Resource'}
           </VerificationBadge>

@@ -22,7 +22,7 @@ const MainContent = styled.main`
 const ContentWrapper = styled.div`
   flex: 1;
   padding: var(--spacing-lg);
-  margin-left: ${props => props.sidebarOpen ? '250px' : '0'};
+  margin-left: ${props => props.$sidebarOpen ? '250px' : '0'};
   transition: margin-left var(--transition-normal);
 
   @media (max-width: 768px) {
@@ -75,7 +75,7 @@ const Layout = ({ children }) => {
           <Sidebar isOpen={sidebarOpen} />
         )}
 
-        <ContentWrapper sidebarOpen={!isPublicRoute && sidebarOpen && currentUser}>
+        <ContentWrapper $sidebarOpen={!isPublicRoute && sidebarOpen && currentUser}>
           {children}
         </ContentWrapper>
       </MainContent>

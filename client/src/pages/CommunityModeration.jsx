@@ -33,9 +33,9 @@ const Tab = styled.button`
   padding: var(--spacing-md) var(--spacing-lg);
   background: none;
   border: none;
-  border-bottom: 3px solid ${props => props.active ? 'var(--primary-color)' : 'transparent'};
-  color: ${props => props.active ? 'var(--primary-color)' : 'var(--text-color)'};
-  font-weight: ${props => props.active ? '600' : '400'};
+  border-bottom: 3px solid ${props => props.$active ? 'var(--primary-color)' : 'transparent'};
+  color: ${props => props.$active ? 'var(--primary-color)' : 'var(--text-color)'};
+  font-weight: ${props => props.$active ? '600' : '400'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
@@ -227,13 +227,13 @@ const CommunityModeration = () => {
         
         <TabsContainer>
           <Tab 
-            active={activeTab === 'posts'}
+            $active={activeTab === 'posts'}
             onClick={() => setActiveTab('posts')}
           >
             Reported Posts
           </Tab>
           <Tab 
-            active={activeTab === 'comments'}
+            $active={activeTab === 'comments'}
             onClick={() => setActiveTab('comments')}
           >
             Reported Comments

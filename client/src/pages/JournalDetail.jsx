@@ -54,8 +54,8 @@ const PrivacyBadge = styled.div`
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: ${props => props.isPrivate ? 'rgba(76, 217, 100, 0.1)' : 'rgba(255, 204, 0, 0.1)'};
-  color: ${props => props.isPrivate ? 'var(--success-color)' : 'var(--warning-color)'};
+  background-color: ${props => props.$isPrivate ? 'rgba(76, 217, 100, 0.1)' : 'rgba(255, 204, 0, 0.1)'};
+  color: ${props => props.$isPrivate ? 'var(--success-color)' : 'var(--warning-color)'};
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-small);
 
@@ -78,10 +78,10 @@ const MoodIndicator = styled.div`
     border-radius: 50%;
     margin-right: var(--spacing-md);
     background-color: ${props => {
-      if (props.value >= 9) return '#4cd964'; // Excellent
-      if (props.value >= 7) return '#5ac8fa'; // Good
-      if (props.value >= 5) return '#ffcc00'; // Neutral
-      if (props.value >= 3) return '#ff9500'; // Poor
+      if (props.$value >= 9) return '#4cd964'; // Excellent
+      if (props.$value >= 7) return '#5ac8fa'; // Good
+      if (props.$value >= 5) return '#ffcc00'; // Neutral
+      if (props.$value >= 3) return '#ff9500'; // Poor
       return '#ff3b30'; // Very Poor
     }};
   }
@@ -269,14 +269,14 @@ const JournalDetail = () => {
                 <span> (Edited: {formatDate(journal.updatedAt)})</span>
               )}
             </JournalDate>
-            <PrivacyBadge isPrivate={journal.isPrivate}>
+            <PrivacyBadge $isPrivate={journal.isPrivate}>
               <i className={`fas fa-${journal.isPrivate ? 'lock' : 'unlock'}`}></i>
               {journal.isPrivate ? 'Private Entry' : 'Shared Entry'}
             </PrivacyBadge>
           </JournalMeta>
 
           {journal.mood && (
-            <MoodIndicator value={journal.mood}>
+            <MoodIndicator $value={journal.mood}>
               <span></span>
               <div>
                 <h3>Mood: {getMoodDescription(journal.mood)}</h3>

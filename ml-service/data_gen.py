@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+import os
 
 def generate_mood_data(num_rows=3000):
     np.random.seed(42)
@@ -52,5 +53,8 @@ def generate_mood_data(num_rows=3000):
 if __name__ == "__main__":
     print("Generating synthetic mood data...")
     df = generate_mood_data(5000)
-    df.to_csv('ml-service/data/synthetic_mood_data.csv', index=False)
-    print(f"Dataset saved to ml-service/data/synthetic_mood_data.csv ({len(df)} rows)")
+    base = os.path.dirname(os.path.abspath(__file__))
+    os.makedirs(os.path.join(base, 'data'), exist_ok=True)
+    out_path = os.path.join(base, 'data', 'synthetic_mood_data.csv')
+    df.to_csv(out_path, index=False)
+    print(f"Dataset saved to {out_path} ({len(df)} rows)")

@@ -55,15 +55,15 @@ const CategoryButton = styled.button`
   align-items: center;
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md);
-  border: 1px solid ${props => props.selected ? 'var(--primary-color)' : 'var(--border-color)'};
-  background-color: ${props => props.selected ? 'rgba(0, 113, 227, 0.1)' : 'var(--card-background)'};
-  color: ${props => props.selected ? 'var(--primary-color)' : 'var(--text-color)'};
+  border: 1px solid ${props => props.$selected ? 'var(--primary-color)' : 'var(--border-color)'};
+  background-color: ${props => props.$selected ? 'rgba(0, 113, 227, 0.1)' : 'var(--card-background)'};
+  color: ${props => props.$selected ? 'var(--primary-color)' : 'var(--text-color)'};
   cursor: pointer;
   transition: all var(--transition-fast);
   width: calc(33.333% - var(--spacing-sm));
   
   &:hover {
-    background-color: ${props => props.selected ? 'rgba(0, 113, 227, 0.1)' : 'var(--background-color)'};
+    background-color: ${props => props.$selected ? 'rgba(0, 113, 227, 0.1)' : 'var(--background-color)'};
   }
   
   i {
@@ -354,7 +354,7 @@ const GoalForm = () => {
               name="title"
               label="Goal Title"
               placeholder="What do you want to achieve?"
-              value={formData.title}
+              value={formData.title || ''}
               onChange={handleInputChange}
               required
             />
@@ -371,7 +371,7 @@ const GoalForm = () => {
                 name="description"
                 rows="4"
                 placeholder="Describe your goal..."
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={handleInputChange}
                 required
               />
@@ -388,7 +388,7 @@ const GoalForm = () => {
                   <CategoryButton
                     key={category.name}
                     type="button"
-                    selected={formData.category === category.name}
+                    $selected={formData.category === category.name}
                     onClick={() => handleCategorySelect(category.name)}
                   >
                     <i className={`fas fa-${category.icon}`}></i>
@@ -410,7 +410,7 @@ const GoalForm = () => {
                     <StepNumber>{index + 1}</StepNumber>
                     <StepInput
                       placeholder={`Step ${index + 1}: What needs to be done?`}
-                      value={step.description}
+                      value={step.description || ''}
                       onChange={(e) => handleStepChange(index, e.target.value)}
                     />
                     {formData.steps.length > 1 && (

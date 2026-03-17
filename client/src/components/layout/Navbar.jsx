@@ -61,9 +61,10 @@ const NavLinks = styled.div`
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  margin: 0;
 
   @media (max-width: 768px) {
-    display: ${props => props.isOpen ? 'flex' : 'none'};
+    display: ${props => props.$isOpen ? 'flex' : 'none'};
     flex-direction: column;
     position: absolute;
     top: 100%;
@@ -82,6 +83,9 @@ const NavLink = styled(Link)`
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--border-radius-sm);
   transition: background-color var(--transition-fast);
+  
+  background-color: ${props => props.$active ? 'var(--background-color)' : 'transparent'};
+  color: ${props => props.$active ? 'var(--primary-color)' : 'var(--text-color)'};
 
   &:hover {
     background-color: var(--background-color);
@@ -157,17 +161,17 @@ const Navbar = ({ toggleSidebar }) => {
         <i className={`fas fa-${mobileMenuOpen ? 'times' : 'bars'}`}></i>
       </MobileMenuButton>
 
-      <NavLinks isOpen={mobileMenuOpen}>
+      <NavLinks $isOpen={mobileMenuOpen}>
         {currentUser ? (
           <>
-            <NavLink to="/dashboard">Dashboard</NavLink>
-            <NavLink to="/mood-tracker">Mood Tracker</NavLink>
-            <NavLink to="/journal">Journal</NavLink>
-            <NavLink to="/goals">Goals</NavLink>
-            <NavLink to="/exercises">Exercises</NavLink>
-            <NavLink to="/resources">Resources</NavLink>
-            <NavLink to="/community">Community</NavLink>
-            <NavLink to="/ai-chat">
+            <NavLink to="/dashboard" $active={location.pathname === '/dashboard'}>Dashboard</NavLink>
+            <NavLink to="/mood-tracker" $active={location.pathname === '/mood-tracker'}>Mood Tracker</NavLink>
+            <NavLink to="/journal" $active={location.pathname === '/journal'}>Journal</NavLink>
+            <NavLink to="/goals" $active={location.pathname === '/goals'}>Goals</NavLink>
+            <NavLink to="/exercises" $active={location.pathname === '/exercises'}>Exercises</NavLink>
+            <NavLink to="/resources" $active={location.pathname === '/resources'}>Resources</NavLink>
+            <NavLink to="/community" $active={location.pathname.startsWith('/community')}>Community</NavLink>
+            <NavLink to="/ai-chat" $active={location.pathname === '/ai-chat'}>
               <i className="fas fa-robot"></i> AI Assistant
             </NavLink>
             <NavActions>

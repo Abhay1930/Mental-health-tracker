@@ -33,13 +33,13 @@ const FilterButton = styled.button`
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--border-radius-md);
   border: 1px solid var(--border-color);
-  background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.active ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--card-background)'};
+  color: ${props => props.$active ? 'white' : 'var(--text-color)'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--background-color)'};
+    background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--background-color)'};
   }
 `;
 
@@ -263,7 +263,7 @@ const Exercises = () => {
           {categories.map(category => (
             <FilterButton
               key={category}
-              active={activeCategory === category}
+              $active={activeCategory === category}
               onClick={() => handleCategoryChange(category)}
             >
               {category}
@@ -290,8 +290,8 @@ const Exercises = () => {
             {filteredExercises.map(exercise => (
               <ExerciseCard
                 key={exercise._id}
-                hoverable
-                clickable
+                $hoverable
+                $clickable
                 as={Link}
                 to={`/exercises/${exercise._id}`}
               >

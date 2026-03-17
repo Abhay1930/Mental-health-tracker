@@ -39,13 +39,13 @@ const FilterButton = styled.button`
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--border-radius-md);
   border: 1px solid var(--border-color);
-  background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.active ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--card-background)'};
+  color: ${props => props.$active ? 'white' : 'var(--text-color)'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--background-color)'};
+    background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--background-color)'};
   }
 `;
 
@@ -155,7 +155,7 @@ const StatItem = styled.div`
   font-size: var(--font-size-small);
   
   i {
-    color: ${props => props.active ? 'var(--primary-color)' : 'var(--text-secondary)'};
+    color: ${props => props.$active ? 'var(--primary-color)' : 'var(--text-secondary)'};
   }
 `;
 
@@ -358,7 +358,7 @@ const Community = () => {
         
         <FiltersContainer>
           <FilterButton
-            active={activeTag === 'All'}
+            $active={activeTag === 'All'}
             onClick={() => handleTagChange('All')}
           >
             All Posts
@@ -366,7 +366,7 @@ const Community = () => {
           {tags.map(tag => (
             <FilterButton
               key={tag}
-              active={activeTag === tag}
+              $active={activeTag === tag}
               onClick={() => handleTagChange(tag)}
             >
               {tag}
@@ -391,8 +391,8 @@ const Community = () => {
             {filteredPosts.map(post => (
               <PostCard
                 key={post._id}
-                hoverable
-                clickable
+                $hoverable
+                $clickable
                 as={Link}
                 to={`/community/${post._id}`}
               >
@@ -433,7 +433,7 @@ const Community = () => {
                 
                 <PostFooter>
                   <PostStats>
-                    <StatItem active={post.likes.includes(currentUser?._id)}>
+                    <StatItem $active={post.likes.includes(currentUser?._id)}>
                       <i className="fas fa-heart"></i>
                       {post.likes.length}
                     </StatItem>

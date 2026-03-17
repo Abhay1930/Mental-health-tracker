@@ -102,8 +102,11 @@ exports.deleteMood = async (req, res) => {
 
 exports.getPrediction = async (req, res) => {
   try {
+    console.log('Prediction requested for user:', req.user.id);
     const moods = await Mood.find({ user: req.user.id }).sort({ date: -1 }).limit(1);
     const lastMood = moods.length > 0 ? moods[0] : null;
+
+    console.log('Last mood entry:', lastMood ? 'found' : 'not found, using defaults');
 
     const predictionData = {
       sleep_hours: lastMood?.sleepHours || 7,
@@ -115,7 +118,7 @@ exports.getPrediction = async (req, res) => {
       prev_mood: lastMood?.mood || 5
     };
 
-    const response = await fetch('http://localhost:5005/predict-mood', {
+    const response = await fetch('http://127.0.0.1:5006/predict-mood', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(predictionData)

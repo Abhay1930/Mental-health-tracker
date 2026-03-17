@@ -62,10 +62,10 @@ const StyledButton = styled.button`
   border: none;
   outline: none;
   
-  ${props => ButtonVariants[props.variant || 'primary']}
-  ${props => ButtonSizes[props.size || 'medium']}
+  ${props => ButtonVariants[props.$variant || 'primary']}
+  ${props => ButtonSizes[props.$size || 'medium']}
   
-  ${props => props.fullWidth && css`
+  ${props => props.$fullWidth && css`
     width: 100%;
   `}
   
@@ -93,9 +93,9 @@ const Button = ({
   return (
     <StyledButton
       type={type}
-      variant={variant}
-      size={size}
-      fullWidth={fullWidth}
+      $variant={variant}
+      $size={size}
+      $fullWidth={fullWidth}
       disabled={disabled}
       onClick={onClick}
       {...props}

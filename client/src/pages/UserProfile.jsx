@@ -93,9 +93,9 @@ const Tab = styled.button`
   padding: var(--spacing-md) var(--spacing-lg);
   background: none;
   border: none;
-  border-bottom: 3px solid ${props => props.active ? 'var(--primary-color)' : 'transparent'};
-  color: ${props => props.active ? 'var(--primary-color)' : 'var(--text-color)'};
-  font-weight: ${props => props.active ? '600' : '400'};
+  border-bottom: 3px solid ${props => props.$active ? 'var(--primary-color)' : 'transparent'};
+  color: ${props => props.$active ? 'var(--primary-color)' : 'var(--text-color)'};
+  font-weight: ${props => props.$active ? '600' : '400'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
@@ -311,7 +311,7 @@ const UserProfile = () => {
         
         <TabsContainer>
           <Tab 
-            active={activeTab === 'posts'}
+            $active={activeTab === 'posts'}
             onClick={() => setActiveTab('posts')}
           >
             Posts
@@ -330,8 +330,8 @@ const UserProfile = () => {
                 {posts.map(post => (
                   <PostCard
                     key={post._id}
-                    hoverable
-                    clickable
+                    $hoverable
+                    $clickable
                     as={Link}
                     to={`/community/${post._id}`}
                   >

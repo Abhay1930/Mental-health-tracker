@@ -18,15 +18,15 @@ const Label = styled.label`
 const StyledInput = styled.input`
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--border-radius-md);
-  border: 1px solid ${props => props.error ? 'var(--error-color)' : 'var(--border-color)'};
+  border: 1px solid ${props => props.$error ? 'var(--error-color)' : 'var(--border-color)'};
   background-color: var(--card-background);
   font-size: var(--font-size-medium);
   transition: border-color var(--transition-fast);
   
   &:focus {
     outline: none;
-    border-color: ${props => props.error ? 'var(--error-color)' : 'var(--primary-color)'};
-    box-shadow: 0 0 0 1px ${props => props.error ? 'var(--error-color)' : 'var(--primary-color)'};
+    border-color: ${props => props.$error ? 'var(--error-color)' : 'var(--primary-color)'};
+    box-shadow: 0 0 0 1px ${props => props.$error ? 'var(--error-color)' : 'var(--primary-color)'};
   }
   
   &::placeholder {
@@ -92,7 +92,7 @@ const Input = ({
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        error={!!error}
+        $error={!!error}
         disabled={disabled}
         required={required}
         {...props}

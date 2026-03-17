@@ -6,7 +6,7 @@ const path = require("path");
 const { validateApiKey } = require("./services/aiService");
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Initialize Express app
 const app = express();
@@ -15,22 +15,32 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB and validate OpenAI API key
-Promise.all([
-  mongoose.connect(
-    process.env.MONGODB_URI || "mongodb://localhost:27017/mental-health-app"
-  ),
-  validateApiKey(),
-])
-  .then(([mongoConnection, isApiKeyValid]) => {
-    console.log("MongoDB connected");
-    if (!isApiKeyValid) {
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+
+// Connect to MongoDB
+console.log("Connecting to MongoDB...");
+mongoose.connect(
+  process.env.MONGODB_URI || "mongodb://localhost:27017/mental-health-app"
+)
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.error("MongoDB connection error:", err));
+
+// Validate AI Service
+console.log("Initializing AI service...");
+validateApiKey()
+  .then(isValid => {
+    if (isValid) {
+      console.log("AI service initialized successfully");
+    } else {
       console.warn("OpenAI features will be disabled due to invalid API key");
     }
   })
-  .catch((err) => {
-    console.error("Startup error:", err);
-  });
+  .catch(err => console.error("AI service error:", err));
+
 
 // Import routes
 const authRoutes = require("./routes/auth");
@@ -51,6 +61,9 @@ app.use("/api/journal", journalRoutes);
 app.use("/api/goals", goalsRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/ai", aiRoutes);
+
+app.get("/api/health", (req, res) => res.json({ status: 'ok' }));
+
 
 // Serve static assets in production
 if (process.env.NODE_ENV === "production") {

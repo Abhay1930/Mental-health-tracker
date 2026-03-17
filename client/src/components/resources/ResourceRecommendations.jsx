@@ -38,7 +38,7 @@ const ResourceCategory = styled.div`
   display: inline-block;
   padding: var(--spacing-xs) var(--spacing-sm);
   background-color: ${props => {
-    switch (props.category) {
+    switch (props.$category) {
       case 'Hotline': return 'rgba(255, 59, 48, 0.1)';
       case 'Online Platform': return 'rgba(0, 122, 255, 0.1)';
       case 'Therapist': return 'rgba(88, 86, 214, 0.1)';
@@ -47,7 +47,7 @@ const ResourceCategory = styled.div`
     }
   }};
   color: ${props => {
-    switch (props.category) {
+    switch (props.$category) {
       case 'Hotline': return 'var(--error-color)';
       case 'Online Platform': return 'var(--primary-color)';
       case 'Therapist': return '#5856D6';
@@ -229,12 +229,12 @@ const ResourceRecommendations = () => {
         {recommendations.map(resource => (
           <RecommendationCard
             key={resource._id}
-            hoverable
-            clickable
+            $hoverable
+            $clickable
             as={Link}
             to={`/resources/${resource._id}`}
           >
-            <ResourceCategory category={resource.category}>
+            <ResourceCategory $category={resource.category}>
               {resource.category}
             </ResourceCategory>
             <ResourceTitle>{resource.title}</ResourceTitle>

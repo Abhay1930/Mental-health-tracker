@@ -38,13 +38,13 @@ const FilterButton = styled.button`
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--border-radius-md);
   border: 1px solid var(--border-color);
-  background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.active ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--card-background)'};
+  color: ${props => props.$active ? 'white' : 'var(--text-color)'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--background-color)'};
+    background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--background-color)'};
   }
 `;
 
@@ -76,7 +76,7 @@ const GoalIcon = styled.div`
   height: 40px;
   border-radius: 50%;
   background-color: ${props => {
-    switch (props.category) {
+    switch (props.$category) {
       case 'Mental': return '#5ac8fa';
       case 'Physical': return '#4cd964';
       case 'Social': return '#ffcc00';
@@ -142,12 +142,12 @@ const ProgressBar = styled.div`
 
 const ProgressFill = styled.div`
   height: 100%;
-  width: ${props => props.progress}%;
+  width: ${props => props.$progress}%;
   background-color: ${props => {
-    if (props.progress === 100) return 'var(--success-color)';
-    if (props.progress >= 75) return '#4cd964';
-    if (props.progress >= 50) return '#ffcc00';
-    if (props.progress >= 25) return '#ff9500';
+    if (props.$progress === 100) return 'var(--success-color)';
+    if (props.$progress >= 75) return '#4cd964';
+    if (props.$progress >= 50) return '#ffcc00';
+    if (props.$progress >= 25) return '#ff9500';
     return '#ff3b30';
   }};
   transition: width var(--transition-normal);
@@ -340,7 +340,7 @@ const Goals = () => {
           {categories.map(category => (
             <FilterButton
               key={category}
-              active={activeCategory === category}
+              $active={activeCategory === category}
               onClick={() => handleCategoryChange(category)}
             >
               {category}
@@ -352,7 +352,7 @@ const Goals = () => {
           {filters.map(filter => (
             <FilterButton
               key={filter}
-              active={activeFilter === filter}
+              $active={activeFilter === filter}
               onClick={() => handleFilterChange(filter)}
             >
               {filter}
@@ -377,13 +377,13 @@ const Goals = () => {
             {filteredGoals.map(goal => (
               <GoalCard
                 key={goal._id}
-                hoverable
-                clickable
+                $hoverable
+                $clickable
                 as={Link}
                 to={`/goals/${goal._id}`}
               >
                 <GoalHeader>
-                  <GoalIcon category={goal.category}>
+                  <GoalIcon $category={goal.category}>
                     <i className={`fas fa-${getCategoryIcon(goal.category)}`}></i>
                   </GoalIcon>
                   <GoalInfo>
@@ -411,7 +411,7 @@ const Goals = () => {
                     <span>{goal.progress}%</span>
                   </ProgressLabel>
                   <ProgressBar>
-                    <ProgressFill progress={goal.progress} />
+                    <ProgressFill $progress={goal.progress} />
                   </ProgressBar>
                   <DateInfo>
                     <span>

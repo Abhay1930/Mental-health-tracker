@@ -63,8 +63,8 @@ const Tag = styled.div`
   display: flex;
   align-items: center;
   padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: ${props => props.selected ? 'var(--primary-color)' : 'var(--background-color)'};
-  color: ${props => props.selected ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$selected ? 'var(--primary-color)' : 'var(--background-color)'};
+  color: ${props => props.$selected ? 'white' : 'var(--text-color)'};
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-small);
   
@@ -360,7 +360,7 @@ const PostForm = () => {
                 {commonTags.map(tag => (
                   <Tag 
                     key={tag}
-                    selected={formData.tags.includes(tag)}
+                    $selected={formData.tags.includes(tag)}
                     onClick={() => toggleCommonTag(tag)}
                   >
                     {tag}
@@ -373,7 +373,7 @@ const PostForm = () => {
                   <SectionTitle>Your Tags</SectionTitle>
                   <TagsContainer>
                     {formData.tags.map(tag => (
-                      <Tag key={tag} selected>
+                      <Tag key={tag} $selected>
                         {tag}
                         <button type="button" onClick={() => removeTag(tag)}>
                           <i className="fas fa-times"></i>

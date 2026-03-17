@@ -1,22 +1,25 @@
 import styled from 'styled-components';
 
-const StyledCard = styled.div`
+const StyledCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => 
+    !['hoverable', 'clickable', 'isOpen', 'active', 'completed', 'progress', 'category', 'isPrivate', 'selected', 'checked'].includes(prop)
+})`
   background-color: var(--card-background);
   border-radius: var(--border-radius-lg);
   box-shadow: 0 4px 6px var(--shadow-color);
-  padding: ${props => props.padding || 'var(--spacing-lg)'};
-  margin-bottom: ${props => props.marginBottom || 'var(--spacing-lg)'};
-  width: ${props => props.width || '100%'};
+  padding: ${props => props.$padding || 'var(--spacing-lg)'};
+  margin-bottom: ${props => props.$marginBottom || 'var(--spacing-lg)'};
+  width: ${props => props.$width || '100%'};
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   
-  ${props => props.hoverable && `
+  ${props => props.$hoverable && `
     &:hover {
       transform: translateY(-4px);
       box-shadow: 0 10px 20px var(--shadow-color);
     }
   `}
   
-  ${props => props.clickable && `
+  ${props => props.$clickable && `
     cursor: pointer;
   `}
 `;
@@ -24,7 +27,7 @@ const StyledCard = styled.div`
 const CardHeader = styled.div`
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-sm);
-  border-bottom: ${props => props.divider ? '1px solid var(--border-color)' : 'none'};
+  border-bottom: ${props => props.$divider ? '1px solid var(--border-color)' : 'none'};
 `;
 
 const CardTitle = styled.h3`
@@ -42,15 +45,15 @@ const CardSubtitle = styled.h4`
 `;
 
 const CardBody = styled.div`
-  margin-bottom: ${props => props.noFooter ? '0' : 'var(--spacing-md)'};
+  margin-bottom: ${props => props.$noFooter ? '0' : 'var(--spacing-md)'};
 `;
 
 const CardFooter = styled.div`
   display: flex;
-  justify-content: ${props => props.align || 'flex-end'};
+  justify-content: ${props => props.$align || 'flex-end'};
   align-items: center;
   padding-top: var(--spacing-sm);
-  border-top: ${props => props.divider ? '1px solid var(--border-color)' : 'none'};
+  border-top: ${props => props.$divider ? '1px solid var(--border-color)' : 'none'};
   gap: var(--spacing-sm);
 `;
 
@@ -62,37 +65,45 @@ const Card = ({
   headerDivider = true,
   footerDivider = true,
   footerAlign = 'flex-end',
-  hoverable = false,
-  clickable = false,
+  $hoverable = false,
+  $clickable = false,
   padding,
   marginBottom,
   width,
   onClick,
+  isOpen, // Filter out
+  active, // Filter out
+  completed, // Filter out
+  progress, // Filter out
+  category, // Filter out
+  isPrivate, // Filter out
+  selected, // Filter out
+  checked, // Filter out
   ...props 
 }) => {
   return (
     <StyledCard 
-      hoverable={hoverable} 
-      clickable={clickable}
-      padding={padding}
-      marginBottom={marginBottom}
-      width={width}
-      onClick={clickable ? onClick : undefined}
+      $hoverable={$hoverable} 
+      $clickable={$clickable}
+      $padding={padding}
+      $marginBottom={marginBottom}
+      $width={width}
+      onClick={$clickable ? onClick : undefined}
       {...props}
     >
       {(title || subtitle) && (
-        <CardHeader divider={headerDivider}>
+        <CardHeader $divider={headerDivider}>
           {title && <CardTitle>{title}</CardTitle>}
           {subtitle && <CardSubtitle>{subtitle}</CardSubtitle>}
         </CardHeader>
       )}
       
-      <CardBody noFooter={!footer}>
+      <CardBody $noFooter={!footer}>
         {children}
       </CardBody>
       
       {footer && (
-        <CardFooter divider={footerDivider} align={footerAlign}>
+        <CardFooter $divider={footerDivider} $align={footerAlign}>
           {footer}
         </CardFooter>
       )}

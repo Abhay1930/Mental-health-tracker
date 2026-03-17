@@ -41,9 +41,9 @@ const AccessibilityPanel = styled.div`
   border-radius: var(--border-radius-md);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   padding: var(--spacing-md);
-  transform: ${props => props.isOpen ? 'translateY(0)' : 'translateY(20px)'};
-  opacity: ${props => props.isOpen ? 1 : 0};
-  visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
+  transform: ${props => props.$isOpen ? 'translateY(0)' : 'translateY(20px)'};
+  opacity: ${props => props.$isOpen ? 1 : 0};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
   transition: all var(--transition-normal);
 `;
 
@@ -108,7 +108,7 @@ const ToggleSwitch = styled.div`
   position: relative;
   width: 50px;
   height: 24px;
-  background-color: ${props => props.checked ? 'var(--primary-color)' : 'var(--border-color)'};
+  background-color: ${props => props.$checked ? 'var(--primary-color)' : 'var(--border-color)'};
   border-radius: 12px;
   transition: background-color var(--transition-fast);
   margin-right: var(--spacing-sm);
@@ -121,7 +121,7 @@ const ToggleSwitch = styled.div`
     border-radius: 50%;
     background-color: white;
     top: 2px;
-    left: ${props => props.checked ? '28px' : '2px'};
+    left: ${props => props.$checked ? '28px' : '2px'};
     transition: left var(--transition-fast);
   }
 `;
@@ -194,13 +194,13 @@ const OptionButton = styled.button`
   padding: var(--spacing-sm);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
-  background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.active ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--card-background)'};
+  color: ${props => props.$active ? 'white' : 'var(--text-color)'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--background-color)'};
+    background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--background-color)'};
   }
   
   &:focus {
@@ -319,7 +319,7 @@ const AccessibilityMenu = () => {
         <i className="fas fa-universal-access"></i>
       </AccessibilityButton>
       
-      <AccessibilityPanel isOpen={isOpen}>
+      <AccessibilityPanel $isOpen={isOpen}>
         <PanelHeader>
           <PanelTitle>Accessibility Options</PanelTitle>
           <CloseButton 
@@ -337,25 +337,25 @@ const AccessibilityMenu = () => {
           </OptionDescription>
           <ButtonOption>
             <OptionButton 
-              active={options.fontSize === 0.9}
+              $active={options.fontSize === 0.9}
               onClick={() => handleFontSizeChange(0.9)}
             >
               Small
             </OptionButton>
             <OptionButton 
-              active={options.fontSize === 1}
+              $active={options.fontSize === 1}
               onClick={() => handleFontSizeChange(1)}
             >
               Normal
             </OptionButton>
             <OptionButton 
-              active={options.fontSize === 1.1}
+              $active={options.fontSize === 1.1}
               onClick={() => handleFontSizeChange(1.1)}
             >
               Large
             </OptionButton>
             <OptionButton 
-              active={options.fontSize === 1.2}
+              $active={options.fontSize === 1.2}
               onClick={() => handleFontSizeChange(1.2)}
             >
               X-Large
@@ -398,7 +398,7 @@ const AccessibilityMenu = () => {
                 checked={options.highContrast}
                 onChange={() => handleToggleChange('highContrast')}
               />
-              <ToggleSwitch checked={options.highContrast} />
+              <ToggleSwitch $checked={options.highContrast} />
             </ToggleLabel>
           </ToggleOption>
         </OptionGroup>
@@ -417,7 +417,7 @@ const AccessibilityMenu = () => {
                 checked={options.reducedMotion}
                 onChange={() => handleToggleChange('reducedMotion')}
               />
-              <ToggleSwitch checked={options.reducedMotion} />
+              <ToggleSwitch $checked={options.reducedMotion} />
             </ToggleLabel>
           </ToggleOption>
         </OptionGroup>
@@ -436,7 +436,7 @@ const AccessibilityMenu = () => {
                 checked={options.dyslexicFont}
                 onChange={() => handleToggleChange('dyslexicFont')}
               />
-              <ToggleSwitch checked={options.dyslexicFont} />
+              <ToggleSwitch $checked={options.dyslexicFont} />
             </ToggleLabel>
           </ToggleOption>
         </OptionGroup>

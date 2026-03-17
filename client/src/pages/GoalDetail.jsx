@@ -43,7 +43,7 @@ const GoalIcon = styled.div`
   height: 60px;
   border-radius: 50%;
   background-color: ${props => {
-    switch (props.category) {
+    switch (props.$category) {
       case 'Mental': return '#5ac8fa';
       case 'Physical': return '#4cd964';
       case 'Social': return '#ffcc00';
@@ -119,7 +119,7 @@ const ProgressLabel = styled.div`
   span {
     font-size: var(--font-size-medium);
     color: ${props => {
-      if (props.progress === 100) return 'var(--success-color)';
+      if (props.$progress === 100) return 'var(--success-color)';
       return 'var(--text-secondary)';
     }};
     font-weight: 600;
@@ -136,12 +136,12 @@ const ProgressBar = styled.div`
 
 const ProgressFill = styled.div`
   height: 100%;
-  width: ${props => props.progress}%;
+  width: ${props => props.$progress}%;
   background-color: ${props => {
-    if (props.progress === 100) return 'var(--success-color)';
-    if (props.progress >= 75) return '#4cd964';
-    if (props.progress >= 50) return '#ffcc00';
-    if (props.progress >= 25) return '#ff9500';
+    if (props.$progress === 100) return 'var(--success-color)';
+    if (props.$progress >= 75) return '#4cd964';
+    if (props.$progress >= 50) return '#ffcc00';
+    if (props.$progress >= 25) return '#ff9500';
     return '#ff3b30';
   }};
   transition: width var(--transition-normal);
@@ -176,7 +176,7 @@ const StepItem = styled.div`
   transition: background-color var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.completed ? 'rgba(76, 217, 100, 0.1)' : 'var(--border-color)'};
+    background-color: ${props => props.$completed ? 'rgba(76, 217, 100, 0.1)' : 'var(--border-color)'};
   }
 `;
 
@@ -184,8 +184,8 @@ const StepCheckbox = styled.div`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 2px solid ${props => props.completed ? 'var(--success-color)' : 'var(--border-color)'};
-  background-color: ${props => props.completed ? 'var(--success-color)' : 'transparent'};
+  border: 2px solid ${props => props.$completed ? 'var(--success-color)' : 'var(--border-color)'};
+  background-color: ${props => props.$completed ? 'var(--success-color)' : 'transparent'};
   margin-right: var(--spacing-md);
   cursor: pointer;
   display: flex;
@@ -195,7 +195,7 @@ const StepCheckbox = styled.div`
   transition: all var(--transition-fast);
   
   &:hover {
-    border-color: ${props => props.completed ? 'var(--success-color)' : 'var(--primary-color)'};
+    border-color: ${props => props.$completed ? 'var(--success-color)' : 'var(--primary-color)'};
   }
 `;
 
@@ -204,8 +204,8 @@ const StepContent = styled.div`
   
   p {
     margin: 0;
-    text-decoration: ${props => props.completed ? 'line-through' : 'none'};
-    color: ${props => props.completed ? 'var(--text-secondary)' : 'var(--text-color)'};
+    text-decoration: ${props => props.$completed ? 'line-through' : 'none'};
+    color: ${props => props.$completed ? 'var(--text-secondary)' : 'var(--text-color)'};
   }
 `;
 
@@ -398,7 +398,7 @@ const GoalDetail = () => {
         
         <Card>
           <GoalHeader>
-            <GoalIcon category={goal.category}>
+            <GoalIcon $category={goal.category}>
               <i className={`fas fa-${getCategoryIcon(goal.category)}`}></i>
             </GoalIcon>
             <GoalInfo>
@@ -424,13 +424,13 @@ const GoalDetail = () => {
           
           <ProgressContainer>
             <ProgressHeader>
-              <ProgressLabel progress={goal.progress}>
+              <ProgressLabel $progress={goal.progress}>
                 <h3>Progress</h3>
                 <span>{goal.progress}%</span>
               </ProgressLabel>
             </ProgressHeader>
             <ProgressBar>
-              <ProgressFill progress={goal.progress} />
+              <ProgressFill $progress={goal.progress} />
             </ProgressBar>
           </ProgressContainer>
           
@@ -438,14 +438,14 @@ const GoalDetail = () => {
             <SectionTitle>Steps</SectionTitle>
             <StepsList>
               {goal.steps.map(step => (
-                <StepItem key={step._id} completed={step.isCompleted}>
+                <StepItem key={step._id} $completed={step.isCompleted}>
                   <StepCheckbox 
-                    completed={step.isCompleted}
+                    $completed={step.isCompleted}
                     onClick={() => toggleStepCompletion(step._id, step.isCompleted)}
                   >
                     {step.isCompleted && <i className="fas fa-check"></i>}
                   </StepCheckbox>
-                  <StepContent completed={step.isCompleted}>
+                  <StepContent $completed={step.isCompleted}>
                     <p>{step.description}</p>
                     {step.completedAt && (
                       <StepDate>Completed on {formatDate(step.completedAt)}</StepDate>

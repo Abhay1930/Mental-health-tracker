@@ -66,7 +66,7 @@ const Message = styled.div`
   border-radius: var(--border-radius-md);
   max-width: 80%;
   
-  ${props => props.isUser ? `
+  ${props => props.$isUser ? `
     background-color: var(--primary-color);
     color: white;
     align-self: flex-end;
@@ -185,12 +185,12 @@ const Chatbot = () => {
           
           <ChatMessages>
             {messages.map((msg, index) => (
-              <Message key={index} isUser={msg.isUser}>
+              <Message key={index} $isUser={msg.isUser}>
                 {msg.text}
               </Message>
             ))}
             {isLoading && (
-              <Message isUser={false}>
+              <Message $isUser={false}>
                 <i className="fas fa-spinner fa-spin"></i> Thinking...
               </Message>
             )}

@@ -26,15 +26,15 @@ const MessagesContainer = styled.div`
 const Message = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: ${props => props.isUser ? 'flex-end' : 'flex-start'};
+  align-items: ${props => props.$isUser ? 'flex-end' : 'flex-start'};
 `;
 
 const MessageBubble = styled.div`
   max-width: 70%;
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--border-radius-lg);
-  background-color: ${props => props.isUser ? 'var(--primary-color)' : 'var(--background-color)'};
-  color: ${props => props.isUser ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$isUser ? 'var(--primary-color)' : 'var(--background-color)'};
+  color: ${props => props.$isUser ? 'white' : 'var(--text-color)'};
 `;
 
 const InputContainer = styled.form`
@@ -118,23 +118,23 @@ const AIChat = () => {
 
         <ChatWindow>
           <MessagesContainer>
-            <Message isUser={false}>
-              <MessageBubble isUser={false}>
+            <Message $isUser={false}>
+              <MessageBubble $isUser={false}>
                 Hello! I'm your mental health assistant. How can I help you today?
               </MessageBubble>
             </Message>
             
             {messages.map((message, index) => (
-              <Message key={index} isUser={message.isUser}>
-                <MessageBubble isUser={message.isUser}>
+              <Message key={index} $isUser={message.isUser}>
+                <MessageBubble $isUser={message.isUser}>
                   {message.text}
                 </MessageBubble>
               </Message>
             ))}
             
             {isLoading && (
-              <Message isUser={false}>
-                <MessageBubble isUser={false}>
+              <Message $isUser={false}>
+                <MessageBubble $isUser={false}>
                   Thinking...
                 </MessageBubble>
               </Message>

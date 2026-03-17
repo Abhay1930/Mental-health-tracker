@@ -38,13 +38,13 @@ const FilterButton = styled.button`
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--border-radius-md);
   border: 1px solid var(--border-color);
-  background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.active ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--card-background)'};
+  color: ${props => props.$active ? 'white' : 'var(--text-color)'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--background-color)'};
+    background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--background-color)'};
   }
 `;
 
@@ -129,10 +129,10 @@ const MoodIndicator = styled.div`
     border-radius: 50%;
     margin-right: var(--spacing-xs);
     background-color: ${props => {
-      if (props.value >= 9) return '#4cd964'; // Excellent
-      if (props.value >= 7) return '#5ac8fa'; // Good
-      if (props.value >= 5) return '#ffcc00'; // Neutral
-      if (props.value >= 3) return '#ff9500'; // Poor
+      if (props.$value >= 9) return '#4cd964'; // Excellent
+      if (props.$value >= 7) return '#5ac8fa'; // Good
+      if (props.$value >= 5) return '#ffcc00'; // Neutral
+      if (props.$value >= 3) return '#ff9500'; // Poor
       return '#ff3b30'; // Very Poor
     }};
   }
@@ -313,7 +313,7 @@ const Journal = () => {
         
         <FiltersContainer>
           <FilterButton
-            active={activeTag === 'All'}
+            $active={activeTag === 'All'}
             onClick={() => handleTagChange('All')}
           >
             All Entries
@@ -321,7 +321,7 @@ const Journal = () => {
           {tags.map(tag => (
             <FilterButton
               key={tag}
-              active={activeTag === tag}
+              $active={activeTag === tag}
               onClick={() => handleTagChange(tag)}
             >
               {tag}
@@ -346,8 +346,8 @@ const Journal = () => {
             {filteredJournals.map(journal => (
               <JournalCard
                 key={journal._id}
-                hoverable
-                clickable
+                $hoverable
+                $clickable
                 as={Link}
                 to={`/journal/${journal._id}`}
               >
@@ -355,7 +355,7 @@ const Journal = () => {
                 <JournalTitle>{journal.title}</JournalTitle>
                 
                 {journal.mood && (
-                  <MoodIndicator value={journal.mood}>
+                  <MoodIndicator $value={journal.mood}>
                     <span></span>
                     <p>Mood: {journal.mood}/10 - {getMoodDescription(journal.mood)}</p>
                   </MoodIndicator>

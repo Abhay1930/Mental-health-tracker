@@ -110,7 +110,7 @@ const ActionButton = styled.button`
   gap: var(--spacing-xs);
   background: none;
   border: none;
-  color: ${props => props.active ? 'var(--primary-color)' : 'var(--text-secondary)'};
+  color: ${props => props.$active ? 'var(--primary-color)' : 'var(--text-secondary)'};
   cursor: pointer;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--border-radius-md);
@@ -505,7 +505,7 @@ const PostDetail = () => {
           <PostActions>
             <ActionButton 
               onClick={handleLike}
-              active={hasLiked}
+              $active={hasLiked}
               disabled={liking}
             >
               <i className={`${hasLiked ? 'fas' : 'far'} fa-heart`}></i>

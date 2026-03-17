@@ -50,10 +50,10 @@ const MoodLevel = styled.div`
     font-size: 3rem;
     font-weight: 600;
     color: ${props => {
-      if (props.value >= 9) return '#4cd964'; // Excellent
-      if (props.value >= 7) return '#5ac8fa'; // Good
-      if (props.value >= 5) return '#ffcc00'; // Neutral
-      if (props.value >= 3) return '#ff9500'; // Poor
+      if (props.$value >= 9) return '#4cd964'; // Excellent
+      if (props.$value >= 7) return '#5ac8fa'; // Good
+      if (props.$value >= 5) return '#ffcc00'; // Neutral
+      if (props.$value >= 3) return '#ff9500'; // Poor
       return '#ff3b30'; // Very Poor
     }};
     margin-right: var(--spacing-md);
@@ -122,7 +122,7 @@ const ImpactDot = styled.div`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--border-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--border-color)'};
   margin-right: 3px;
 `;
 
@@ -279,7 +279,7 @@ const MoodDetail = () => {
           
           <DetailSection>
             <SectionTitle>Mood Level</SectionTitle>
-            <MoodLevel value={moodEntry.mood}>
+            <MoodLevel $value={moodEntry.mood}>
               <span>{moodEntry.mood}/10</span>
               <p>{getMoodDescription(moodEntry.mood)}</p>
             </MoodLevel>
@@ -307,7 +307,7 @@ const MoodDetail = () => {
                       <span>Impact:</span>
                       <div>
                         {[1, 2, 3, 4, 5].map(dot => (
-                          <ImpactDot key={dot} active={dot <= factor.impact} />
+                          <ImpactDot key={dot} $active={dot <= factor.impact} />
                         ))}
                       </div>
                     </FactorImpact>

@@ -53,7 +53,7 @@ const ScoreCircle = styled.div`
   height: 100%;
   border-radius: 50%;
   background: conic-gradient(
-    var(--primary-color) ${props => props.score}%,
+    var(--primary-color) ${props => props.$score}%,
     var(--background-color) 0%
   );
   display: flex;
@@ -107,7 +107,7 @@ const FactorIcon = styled.div`
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: ${props => props.color || 'var(--primary-color)'};
+  background-color: ${props => props.$color || 'var(--primary-color)'};
   color: white;
   display: flex;
   align-items: center;
@@ -140,14 +140,14 @@ const FactorBar = styled.div`
 
 const FactorBarFill = styled.div`
   height: 100%;
-  width: ${props => props.value}%;
-  background-color: ${props => props.color || 'var(--primary-color)'};
+  width: ${props => props.$value}%;
+  background-color: ${props => props.$color || 'var(--primary-color)'};
 `;
 
 const FactorValue = styled.div`
   font-size: var(--font-size-small);
   font-weight: 600;
-  color: ${props => props.color || 'var(--primary-color)'};
+  color: ${props => props.$color || 'var(--primary-color)'};
   width: 30px;
   text-align: right;
 `;
@@ -350,7 +350,7 @@ const WellnessScore = () => {
         
         <ScoreContent>
           <ScoreGauge>
-            <ScoreCircle score={score.overall}>
+            <ScoreCircle $score={score.overall}>
               <ScoreValue>{score.overall}</ScoreValue>
             </ScoreCircle>
           </ScoreGauge>
@@ -359,16 +359,16 @@ const WellnessScore = () => {
             <FactorsList>
               {score.factors.map((factor, index) => (
                 <FactorItem key={index}>
-                  <FactorIcon color={factor.color}>
+                  <FactorIcon $color={factor.color}>
                     <i className={`fas fa-${factor.icon}`}></i>
                   </FactorIcon>
                   <FactorInfo>
                     <FactorName>{factor.name}</FactorName>
                     <FactorScore>
                       <FactorBar>
-                        <FactorBarFill value={factor.value} color={factor.color} />
+                        <FactorBarFill $value={factor.value} $color={factor.color} />
                       </FactorBar>
-                      <FactorValue color={factor.color}>{factor.value}</FactorValue>
+                      <FactorValue $color={factor.color}>{factor.value}</FactorValue>
                     </FactorScore>
                   </FactorInfo>
                 </FactorItem>

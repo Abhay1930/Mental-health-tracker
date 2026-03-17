@@ -105,10 +105,10 @@ const MoodDescription = styled.div`
   text-align: center;
   font-weight: 500;
   color: ${props => {
-    if (props.value >= 9) return '#4cd964'; // Excellent
-    if (props.value >= 7) return '#5ac8fa'; // Good
-    if (props.value >= 5) return '#ffcc00'; // Neutral
-    if (props.value >= 3) return '#ff9500'; // Poor
+    if (props.$value >= 9) return '#4cd964'; // Excellent
+    if (props.$value >= 7) return '#5ac8fa'; // Good
+    if (props.$value >= 5) return '#ffcc00'; // Neutral
+    if (props.$value >= 3) return '#ff9500'; // Poor
     return '#ff3b30'; // Very Poor
   }};
 `;
@@ -124,14 +124,14 @@ const ActivityTag = styled.div`
   display: flex;
   align-items: center;
   padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: ${props => props.selected ? 'var(--primary-color)' : 'var(--background-color)'};
-  color: ${props => props.selected ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$selected ? 'var(--primary-color)' : 'var(--background-color)'};
+  color: ${props => props.$selected ? 'white' : 'var(--text-color)'};
   border-radius: var(--border-radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
 
   &:hover {
-    background-color: ${props => props.selected ? 'var(--primary-color)' : 'var(--border-color)'};
+    background-color: ${props => props.$selected ? 'var(--primary-color)' : 'var(--border-color)'};
   }
 `;
 
@@ -171,14 +171,14 @@ const RatingButton = styled.button`
   height: 36px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
-  background-color: ${props => props.selected ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.selected ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$selected ? 'var(--primary-color)' : 'var(--card-background)'};
+  color: ${props => props.$selected ? 'white' : 'var(--text-color)'};
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
 
   &:hover {
-    background-color: ${props => props.selected ? 'var(--primary-color)' : 'var(--background-color)'};
+    background-color: ${props => props.$selected ? 'var(--primary-color)' : 'var(--background-color)'};
   }
 `;
 
@@ -224,9 +224,14 @@ const MoodEntryForm = () => {
 
   const [formData, setFormData] = useState({
     mood: 5,
+    energy: 5,
+    anxiety: 0,
     activities: [],
     factors: [{ factor: '', impact: 3 }],
-    notes: ''
+    notes: '',
+    sleepHours: 8,
+    physicalActivity: 0,
+    socialInteraction: 0
   });
 
   const [loading, setLoading] = useState(false);
@@ -501,7 +506,7 @@ const MoodEntryForm = () => {
                 {commonActivities.map(activity => (
                   <ActivityTag
                     key={activity}
-                    selected={formData.activities.includes(activity)}
+                    $selected={formData.activities.includes(activity)}
                     onClick={() => handleActivityToggle(activity)}
                   >
                     {activity}
@@ -521,7 +526,7 @@ const MoodEntryForm = () => {
                   <FactorItem key={index}>
                     <FactorInput
                       placeholder="Enter a factor (e.g., Sleep, Work, Relationship)"
-                      value={factor.factor}
+                      value={factor.factor || ''}
                       onChange={(e) => handleFactorChange(index, 'factor', e.target.value)}
                     />
 
@@ -531,7 +536,7 @@ const MoodEntryForm = () => {
                         <RatingButton
                           key={rating}
                           type="button"
-                          selected={factor.impact === rating}
+                          $selected={factor.impact === rating}
                           onClick={() => handleFactorChange(index, 'impact', rating)}
                         >
                           {rating}
@@ -623,7 +628,7 @@ const MoodEntryForm = () => {
                 as="textarea"
                 rows="4"
                 placeholder="Write your thoughts here..."
-                value={formData.notes}
+                value={formData.notes || ''}
                 onChange={handleNotesChange}
               />
             </FormSection>

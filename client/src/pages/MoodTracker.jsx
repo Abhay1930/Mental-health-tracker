@@ -67,13 +67,13 @@ const FilterButton = styled.button`
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--border-radius-md);
   border: 1px solid var(--border-color);
-  background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.active ? 'white' : 'var(--text-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--card-background)'};
+  color: ${props => props.$active ? 'white' : 'var(--text-color)'};
   cursor: pointer;
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.active ? 'var(--primary-color)' : 'var(--background-color)'};
+    background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--background-color)'};
   }
 `;
 
@@ -326,31 +326,31 @@ const MoodTracker = () => {
             <Card>
               <FilterContainer>
                 <FilterButton 
-                  active={timeFilter === 'week'} 
+                  $active={timeFilter === 'week'} 
                   onClick={() => setTimeFilter('week')}
                 >
                   Last 7 Days
                 </FilterButton>
                 <FilterButton 
-                  active={timeFilter === 'month'} 
+                  $active={timeFilter === 'month'} 
                   onClick={() => setTimeFilter('month')}
                 >
                   Last 30 Days
                 </FilterButton>
                 <FilterButton 
-                  active={timeFilter === 'quarter'} 
+                  $active={timeFilter === 'quarter'} 
                   onClick={() => setTimeFilter('quarter')}
                 >
                   Last 90 Days
                 </FilterButton>
                 <FilterButton 
-                  active={timeFilter === 'year'} 
+                  $active={timeFilter === 'year'} 
                   onClick={() => setTimeFilter('year')}
                 >
                   Last Year
                 </FilterButton>
                 <FilterButton 
-                  active={timeFilter === 'all'} 
+                  $active={timeFilter === 'all'} 
                   onClick={() => setTimeFilter('all')}
                 >
                   All Time
@@ -369,8 +369,8 @@ const MoodTracker = () => {
                 <MoodEntryCard 
                   key={entry._id}
                   title={formatDate(entry.date)}
-                  hoverable
-                  clickable
+                  $hoverable
+                  $clickable
                   as={Link}
                   to={`/mood-tracker/${entry._id}`}
                 >

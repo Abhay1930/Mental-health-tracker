@@ -10,7 +10,7 @@ const SidebarContainer = styled.aside`
   width: 250px;
   background-color: var(--card-background);
   box-shadow: 2px 0 5px var(--shadow-color);
-  transform: translateX(${props => props.isOpen ? '0' : '-100%'});
+  transform: translateX(${props => props.$isOpen ? '0' : '-100%'});
   transition: transform var(--transition-normal);
   z-index: 90;
   overflow-y: auto;
@@ -93,7 +93,7 @@ const Sidebar = ({ isOpen }) => {
   const { currentUser } = useAuth();
 
   return (
-    <SidebarContainer isOpen={isOpen}>
+    <SidebarContainer $isOpen={isOpen}>
       <SidebarContent>
         <SidebarSection>
           <SidebarSectionTitle>Main</SidebarSectionTitle>
