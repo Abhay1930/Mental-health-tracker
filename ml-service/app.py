@@ -4,45 +4,55 @@ import joblib
 import numpy as np
 import pandas as pd
 import os
-from tensorflow.keras.models import load_model
-
-app = Flask(__name__)
-CORS(app)
-
-# Load model configurations
+# No global tensorflow import to speed up health checks
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def get_path(folder, filename):
     return os.path.join(BASE_DIR, folder, filename)
 
-# Standard mood model
-model_path = get_path('models', 'mood_model.joblib')
-if os.path.exists(model_path):
-    m_data = joblib.load(model_path)
-    model = m_data['model']
-    features = m_data['features']
-    print("Main model loaded.")
-else:
-    model = None
+app = Flask(__name__)
+CORS(app)
 
-# LSTM time-series model
-l_model_path = get_path('models', 'lstm_mood_model.h5')
-l_scaler_path = get_path('models', 'lstm_scaler.joblib')
+# Model Cache
+MODELS = {
+    'base': None,
+    'lstm': None,
+    'lstm_scaler': None,
+    'lstm_features': None,
+    'lstm_seq_length': None
+}
 
-if os.path.exists(l_model_path) and os.path.exists(l_scaler_path):
-    lstm_model = load_model(l_model_path, compile=False)
-    l_data = joblib.load(l_scaler_path)
-    lstm_scaler = l_data['scaler']
-    lstm_features = l_data['features']
-    lstm_seq_length = l_data['seq_length']
-    print("LSTM model loaded.")
-else:
-    lstm_model = None
+def load_base_model():
+    if MODELS['base'] is None:
+        model_path = get_path('models', 'mood_model.joblib')
+        if os.path.exists(model_path):
+            print("Loading Base model...")
+            m_data = joblib.load(model_path)
+            MODELS['base'] = m_data['model']
+            print("Base model loaded.")
+    return MODELS['base']
+
+def load_lstm_model():
+    if MODELS['lstm'] is None:
+        l_model_path = get_path('models', 'lstm_mood_model.h5')
+        l_scaler_path = get_path('models', 'lstm_scaler.joblib')
+        
+        if os.path.exists(l_model_path) and os.path.exists(l_scaler_path):
+            print("Loading LSTM model (this may take a moment)...")
+            from tensorflow.keras.models import load_model as tf_load_model
+            MODELS['lstm'] = tf_load_model(l_model_path, compile=False)
+            l_data = joblib.load(l_scaler_path)
+            MODELS['lstm_scaler'] = l_data['scaler']
+            MODELS['lstm_features'] = l_data['features']
+            MODELS['lstm_seq_length'] = l_data['seq_length']
+            print("LSTM model loaded.")
+    return MODELS['lstm']
 
 @app.route('/predict-mood', methods=['POST'])
 def predict():
+    model = load_base_model()
     if not model:
-        return jsonify({'error': 'Model unavailable'}), 500
+        return jsonify({'error': 'Prediction engine starting up, please wait 15 seconds'}), 503
     
     try:
         req = request.json
@@ -65,23 +75,29 @@ def predict():
             'confidence': conf
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        print(f"Prediction error: {e}")
+        return jsonify({'error': 'Analysis failed'}), 400
 
 @app.route('/predict_future', methods=['POST'])
 def predict_future():
-    if not lstm_model:
-        return jsonify({'error': 'Prediction engine offline'}), 500
+    lstm_model = load_lstm_model()
+    scaler = MODELS['lstm_scaler']
+    seq_length = MODELS['lstm_seq_length']
+    features = MODELS['lstm_features']
+
+    if not lstm_model or scaler is None or seq_length is None or features is None:
+        return jsonify({'error': 'Forecasting engine starting up, please wait 30 seconds'}), 503
     
     try:
         req = request.json
         history = req.get('history', [])
         
-        if len(history) < lstm_seq_length:
+        if len(history) < seq_length:
             return jsonify({'error': 'Insufficient data history'}), 400
             
         # Extract features for LSTM
         inputs = []
-        for h in history[-lstm_seq_length:]:
+        for h in history[-seq_length:]:
             inputs.append([
                 h.get('sleep_hours', 7),
                 h.get('stress_level', 5),
@@ -93,16 +109,16 @@ def predict_future():
             ])
             
         X = np.array(inputs)
-        X_scaled = lstm_scaler.transform(X).reshape(1, lstm_seq_length, len(lstm_features))
+        X_scaled = scaler.transform(X).reshape(1, seq_length, len(features))
         
         # Raw tensor prediction
         y_scaled = lstm_model.predict(X_scaled, verbose=0)[0] 
         
         # Inverse transform logic
         def unscale(val):
-            row = np.zeros(len(lstm_features))
+            row = np.zeros(len(features))
             row[-1] = val
-            return lstm_scaler.inverse_transform([row])[0][-1]
+            return scaler.inverse_transform([row])[0][-1]
 
         preds = [np.clip(unscale(v), 1, 10) for v in y_scaled]
         
@@ -119,11 +135,18 @@ def predict_future():
             '7_days':   {'score': round(float(preds[2]), 1), 'label': label(preds[2])}
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        print(f"Forecast error: {e}")
+        return jsonify({'error': 'Forecasting failed'}), 400
 
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'online', 'models': {'base': model is not None, 'lstm': lstm_model is not None}})
+    return jsonify({
+        'status': 'online', 
+        'models_ready': {
+            'base': MODELS['base'] is not None, 
+            'lstm': MODELS['lstm'] is not None
+        }
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5006)
