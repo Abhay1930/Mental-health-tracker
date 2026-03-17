@@ -234,11 +234,10 @@ const ForecastCard = styled.div`
     font-size: 2.5rem;
     font-weight: 800;
     font-family: var(--font-heading);
-    background: var(--wellness-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--primary-color);
     line-height: 1;
     margin-bottom: 4px;
+    display: block;
   }
 
   .label {
