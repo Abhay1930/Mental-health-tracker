@@ -47,6 +47,7 @@ export const moodApi = {
   updateMood: (id, moodData) => api.put(`/mood/${id}`, moodData),
 
   getPrediction: () => api.get('/mood/predict/tomorrow'),
+  getFuturePrediction: () => api.get('/mood/predict/future'),
 
   deleteMood: (id) => api.delete(`/mood/${id}`)
 };

@@ -175,8 +175,10 @@ const ErrorState = styled.div`
 const MoodTracker = () => {
   const [moodEntries, setMoodEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
+  const [futurePrediction, setFuturePrediction] = useState(null);
   const [timeFilter, setTimeFilter] = useState('week');
   const [loading, setLoading] = useState(true);
+  const [predictLoading, setPredictLoading] = useState(false);
   const [error, setError] = useState(null);
   
   useEffect(() => {
@@ -194,8 +196,21 @@ const MoodTracker = () => {
         setLoading(false);
       }
     };
+
+    const fetchFuturePrediction = async () => {
+      try {
+        setPredictLoading(true);
+        const response = await moodApi.getFuturePrediction();
+        setFuturePrediction(response.data);
+      } catch (err) {
+        console.error('Error fetching future prediction:', err);
+      } finally {
+        setPredictLoading(false);
+      }
+    };
     
     fetchMoodEntries();
+    fetchFuturePrediction();
   }, []);
   
   useEffect(() => {
@@ -360,6 +375,35 @@ const MoodTracker = () => {
               <ChartContainer>
                 <Line data={chartData} options={chartOptions} />
               </ChartContainer>
+            </Card>
+
+            <h2 style={{ margin: 'var(--spacing-xl) 0 var(--spacing-md)' }}>Future Mood Analysis (LSTM Predicted)</h2>
+            <Card>
+              {predictLoading ? (
+                <LoadingState>Analyzing your history to forecast future mood...</LoadingState>
+              ) : futurePrediction ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-lg)' }}>
+                  <div style={{ textAlign: 'center', padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--background-color)' }}>
+                    <h5 style={{ color: 'var(--text-secondary)' }}>Tomorrow</h5>
+                    <h2 style={{ color: 'var(--primary-color)', margin: 'var(--spacing-sm) 0' }}>{futurePrediction.next_day?.score}/10</h2>
+                    <p style={{ margin: 0 }}>{futurePrediction.next_day?.label}</p>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--background-color)' }}>
+                    <h5 style={{ color: 'var(--text-secondary)' }}>In 3 Days</h5>
+                    <h2 style={{ color: 'var(--primary-color)', margin: 'var(--spacing-sm) 0' }}>{futurePrediction['3_days']?.score}/10</h2>
+                    <p style={{ margin: 0 }}>{futurePrediction['3_days']?.label}</p>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--background-color)' }}>
+                    <h5 style={{ color: 'var(--text-secondary)' }}>In 7 Days</h5>
+                    <h2 style={{ color: 'var(--primary-color)', margin: 'var(--spacing-sm) 0' }}>{futurePrediction['7_days']?.score}/10</h2>
+                    <p style={{ margin: 0 }}>{futurePrediction['7_days']?.label}</p>
+                  </div>
+                </div>
+              ) : (
+                <EmptyState>
+                  <p>Could not load future predictions at this time.</p>
+                </EmptyState>
+              )}
             </Card>
             
             <h2 style={{ margin: 'var(--spacing-xl) 0 var(--spacing-md)' }}>Mood Entries</h2>

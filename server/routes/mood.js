@@ -9,6 +9,7 @@ router.get("/", auth, moodController.getMoods);
 
 router.get("/:id", auth, moodController.getMood);
 router.get("/predict/tomorrow", auth, moodController.getPrediction);
+router.get("/predict/future", auth, moodController.getFuturePrediction);
 router.put("/:id", auth, moodController.updateMood);
 
 router.delete("/:id", auth, moodController.deleteMood);
