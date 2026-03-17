@@ -99,7 +99,21 @@ def predict_future():
         scaled_input = lstm_scaler.transform(input_data)
         X = scaled_input.reshape(1, lstm_seq_length, len(lstm_features))
         
-        prediction = lstm_model.predict(X, verbose=0)[0] 
+        # Predict using the LSTM (outputs normalized values)
+        prediction_scaled = lstm_model.predict(X, verbose=0)[0] 
+        
+        # We need to inverse transform the predicted mood scores
+        # We'll create a dummy array with 7 columns (matching the feature dimension)
+        # to correctly "inverse transform" just the mood score.
+        dummy_row = np.zeros(len(lstm_features))
+        
+        unscaled_predictions = []
+        for p_scaled in prediction_scaled:
+            dummy_row[-1] = p_scaled # Put the scaled prediction into the mood_score column
+            unscaled_val = lstm_scaler.inverse_transform([dummy_row])[0][-1]
+            unscaled_predictions.append(unscaled_val)
+            
+        prediction = np.array(unscaled_predictions)
         prediction = np.clip(prediction, 1, 10)
         
         def mood_label(score):

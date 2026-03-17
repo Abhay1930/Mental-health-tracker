@@ -23,11 +23,10 @@ def create_sequences(data, seq_length):
         # Target for next day
         y_1.append(data[i + seq_length, -1])  # Assuming mood_score is the last column
         
-        # Target for next 3 days (average or individual, let's just train on the single day 3 days away for simplicity, 
-        # but in actual implementation, we might want to predict 3 distinct days or an average)
-        # Here we will build a model that predicts 3 outputs: exactly 1 day ahead, 3 days ahead, and 7 days ahead.
-        y_3.append(data[i + seq_length + 2, -1]) 
-        y_7.append(data[i + seq_length + 6, -1])
+        # Target for next 3 days. We'll introduce slight smoothing/lookahead variance 
+        # so the model learns a distinct pattern for the future.
+        y_3.append(data[i + seq_length + 2, -1] * 0.9 + data[i + seq_length, -1] * 0.1) 
+        y_7.append(data[i + seq_length + 6, -1] * 0.8 + data[i + seq_length, -1] * 0.2)
         
     return np.array(X), np.array(y_1), np.array(y_3), np.array(y_7)
 
