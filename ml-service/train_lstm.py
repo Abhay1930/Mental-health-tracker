@@ -7,109 +7,93 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 import joblib
 import os
 
-# Set random seed for reproducibility
+# Random seeds for consistency
 np.random.seed(42)
 tf.random.set_seed(42)
 
-def create_sequences(data, seq_length):
+def build_sequences(data, seq_len):
     """
-    Convert a 2D array of features into 3D sequences of (samples, time_steps, features).
-    The target y is the mood score of the next consecutive days.
+    Prepare 3D sequences for LSTM training.
+    Targets are next day, 3-day shift, and 7-day shift.
     """
     X, y_1, y_3, y_7 = [], [], [], []
-    # We need enough data to predict up to 7 days ahead
-    for i in range(len(data) - seq_length - 7):
-        X.append(data[i:(i + seq_length)])
-        # Target for next day
-        y_1.append(data[i + seq_length, -1])  # Assuming mood_score is the last column
+    
+    # Iterate through data, leaving room for 7-day forecast
+    for i in range(len(data) - seq_len - 7):
+        X.append(data[i:(i + seq_len)])
         
-        # Target for next 3 days. We'll introduce slight smoothing/lookahead variance 
-        # so the model learns a distinct pattern for the future.
-        y_3.append(data[i + seq_length + 2, -1] * 0.9 + data[i + seq_length, -1] * 0.1) 
-        y_7.append(data[i + seq_length + 6, -1] * 0.8 + data[i + seq_length, -1] * 0.2)
+        # Mood score is the last feature
+        current_mood = data[i + seq_len, -1]
         
-    return np.array(X), np.array(y_1), np.array(y_3), np.array(y_7)
+        y_1.append(current_mood)
+        # Smoothing future targets to prevent model collapse
+        y_3.append(data[i + seq_len + 2, -1] * 0.9 + current_mood * 0.1) 
+        y_7.append(data[i + seq_len + 6, -1] * 0.8 + current_mood * 0.2)
+        
+    return np.array(X), np.column_stack((y_1, y_3, y_7))
 
-def train_lstm_model(seq_length=7):
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(base, 'data', 'synthetic_mood_data.csv')
-    if not os.path.exists(data_path):
-        print("Data file not found. Run data_gen.py first.")
+def run_training(seq_len=7):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    input_file = os.path.join(base_dir, 'data', 'synthetic_mood_data.csv')
+    
+    if not os.path.exists(input_file):
+        print("Data source missing.")
         return
 
-    df = pd.read_csv(data_path)
-    
-    # Sort by date just to be safe
+    df = pd.read_csv(input_file)
     df['date'] = pd.to_datetime(df['date'])
     df = df.sort_values('date').reset_index(drop=True)
     
-    # Select features
-    features = [
+    cols = [
         'sleep_hours', 'stress_level', 'exercise_minutes', 
         'social_interaction_level', 'screen_time_hours', 
         'journal_sentiment_score', 'mood_score'
     ]
-    data = df[features].values
+    raw_data = df[cols].values
     
-    # Scale the data
     scaler = MinMaxScaler()
-    scaled_data = scaler.fit_transform(data)
+    scaled = scaler.fit_transform(raw_data)
     
-    # Create sequences
-    X, y_1, y_3, y_7 = create_sequences(scaled_data, seq_length)
+    X, y = build_sequences(scaled, seq_len)
     
-    # Multi-output target: [day_1, day_3, day_7]
-    y = np.column_stack((y_1, y_3, y_7))
+    # Train/Test split
+    idx = int(0.8 * len(X))
+    X_train, X_test = X[:idx], X[idx:]
+    y_train, y_test = y[:idx], y[idx:]
     
-    # Split into train/test
-    split = int(0.8 * len(X))
-    X_train, X_test = X[:split], X[split:]
-    y_train, y_test = y[:split], y[split:]
+    print(f"Dataset active. Train: {len(X_train)} samples, Test: {len(X_test)} samples.")
     
-    print(f"Training on {len(X_train)} sequences, testing on {len(X_test)} sequences...")
-    print(f"X shape: {X.shape}, y shape: {y.shape}")
-    
-    # Build LSTM Model
     model = Sequential([
-        LSTM(64, activation='relu', input_shape=(seq_length, len(features)), return_sequences=True),
+        LSTM(64, activation='relu', input_shape=(seq_len, len(cols)), return_sequences=True),
         Dropout(0.2),
         LSTM(32, activation='relu'),
         Dropout(0.2),
         Dense(16, activation='relu'),
-        Dense(3) # 3 outputs: next_day, 3_days, 7_days
+        Dense(3) # [1d, 3d, 7d]
     ])
     
     model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     
-    # Train the model
-    print("\n--- Training LSTM Model ---")
+    print("\nStarting training...")
     model.fit(X_train, y_train, epochs=30, batch_size=32, validation_split=0.1, verbose=1)
     
-    # Evaluate
-    print("\n--- Model Evaluation ---")
-    loss, mae = model.evaluate(X_test, y_test, verbose=0)
-    print(f"Test MAE: {mae:.4f}")
+    # Export artifacts
+    out_dir = os.path.join(base_dir, 'models')
+    os.makedirs(out_dir, exist_ok=True)
     
-    # Save the model and scaler
-    os.makedirs(os.path.join(base, 'models'), exist_ok=True)
+    m_file = os.path.join(out_dir, 'lstm_mood_model.h5')
+    s_file = os.path.join(out_dir, 'lstm_scaler.joblib')
     
-    # Save keras model
-    model_path = os.path.join(base, 'models', 'lstm_mood_model.h5')
-    model.save(model_path)
-    
-    # Save the scaler and feature info
-    scaler_path = os.path.join(base, 'models', 'lstm_scaler.joblib')
-    model_data = {
+    model.save(m_file)
+    joblib.dump({
         'scaler': scaler,
-        'features': features,
-        'seq_length': seq_length
-    }
-    joblib.dump(model_data, scaler_path)
+        'features': cols,
+        'seq_length': seq_len
+    }, s_file)
     
-    print(f"\nModel saved to {model_path}")
-    print(f"Scaler saved to {scaler_path}")
+    print(f"Exported model to {m_file}")
+    print(f"Exported scaler to {s_file}")
 
 if __name__ == "__main__":
-    # Ensure TF doesn't complain about logs if not needed
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-    train_lstm_model(seq_length=7)
+    run_training()

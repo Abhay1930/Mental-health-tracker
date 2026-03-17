@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
-import Footer from './Footer';
 import { useAuth } from '../../context/AuthContext';
 
 const LayoutContainer = styled.div`
@@ -79,8 +78,6 @@ const Layout = ({ children }) => {
           {children}
         </ContentWrapper>
       </MainContent>
-
-      <Footer />
     </LayoutContainer>
   );
 };

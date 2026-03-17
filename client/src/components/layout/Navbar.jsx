@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../common/Button';
@@ -10,11 +10,14 @@ const NavbarContainer = styled.nav`
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
-  background-color: var(--card-background);
-  box-shadow: 0 2px 4px var(--shadow-color);
+  background-color: ${props => props.$isLanding ? 'rgba(15, 12, 41, 0.85)' : 'var(--card-background)'};
+  backdrop-filter: ${props => props.$isLanding ? 'blur(12px)' : 'none'};
+  border-bottom: ${props => props.$isLanding ? '1px solid rgba(255,255,255,0.08)' : '1px solid var(--border-color)'};
+  box-shadow: ${props => props.$isLanding ? 'none' : '0 2px 4px var(--shadow-color)'};
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background-color 0.3s ease;
 
   @media (max-width: 768px) {
     padding: var(--spacing-sm) var(--spacing-md);
@@ -48,12 +51,19 @@ const MenuButton = styled.button`
 
 const Logo = styled(Link)`
   font-size: var(--font-size-large);
-  font-weight: 600;
-  color: var(--primary-color);
+  font-weight: 800;
+  color: ${props => props.$isLanding ? 'white' : 'var(--primary-color)'};
   text-decoration: none;
+  letter-spacing: -0.02em;
+
+  span {
+    background: linear-gradient(135deg, #6366f1, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
   &:hover {
-    color: var(--secondary-color);
+    color: ${props => props.$isLanding ? 'rgba(255,255,255,0.85)' : 'var(--secondary-color)'};
   }
 `;
 
@@ -136,6 +146,8 @@ const Navbar = ({ toggleSidebar }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLanding = location.pathname === '/';
 
   const handleLogout = () => {
     logout();
@@ -147,14 +159,14 @@ const Navbar = ({ toggleSidebar }) => {
   };
 
   return (
-    <NavbarContainer>
+    <NavbarContainer $isLanding={isLanding}>
       <LogoContainer>
         {currentUser && (
           <MenuButton onClick={toggleSidebar}>
             <i className="fas fa-bars"></i>
           </MenuButton>
         )}
-        <Logo to="/">MindTrack</Logo>
+        <Logo to="/" $isLanding={isLanding}>Mind<span>Track</span></Logo>
       </LogoContainer>
 
       <MobileMenuButton onClick={toggleMobileMenu}>
@@ -186,12 +198,11 @@ const Navbar = ({ toggleSidebar }) => {
           </>
         ) : (
           <>
-            <NavLink to="/about">About</NavLink>
-            <NavLink to="/login">Login</NavLink>
             <NavActions>
               <ThemeToggle />
+              <NavLink to="/login">Sign In</NavLink>
               <Button size="small" onClick={() => navigate('/register')}>
-                Sign Up
+                Get Started
               </Button>
             </NavActions>
           </>

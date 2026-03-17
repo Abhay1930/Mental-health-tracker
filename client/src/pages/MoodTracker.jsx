@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Line } from 'react-chartjs-2';
 import {
@@ -28,142 +28,249 @@ ChartJS.register(
 );
 
 const MoodTrackerContainer = styled.div`
-  padding: var(--spacing-lg) 0;
+  padding: 0;
 `;
 
 const PageHeader = styled.div`
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: var(--wellness-gradient);
+  border-radius: var(--border-radius-xl);
+  color: white;
+  box-shadow: var(--shadow-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
-  
-  @media (max-width: 576px) {
+
+  @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
   }
 `;
 
+const PageHeaderInfo = styled.div``;
+
 const PageTitle = styled.h1`
+  margin-bottom: var(--spacing-xs);
+  font-size: 2.5rem;
+  color: white;
+`;
+
+const PageSubtitle = styled.p`
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
   margin: 0;
+`;
+
+const ChartSection = styled.div`
+  margin-bottom: var(--spacing-xl);
+`;
+
+const ChartHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 1.5rem;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+
+  i {
+    background: var(--wellness-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 `;
 
 const ChartContainer = styled.div`
   height: 400px;
-  margin-bottom: var(--spacing-xl);
+  width: 100%;
 `;
 
 const FilterContainer = styled.div`
   display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  
-  @media (max-width: 576px) {
-    flex-wrap: wrap;
-  }
+  gap: 8px;
 `;
 
 const FilterButton = styled.button`
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--border-color);
-  background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--card-background)'};
-  color: ${props => props.$active ? 'white' : 'var(--text-color)'};
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid ${props => props.$active ? 'var(--primary-color)' : 'var(--border-color)'};
+  background-color: ${props => props.$active ? 'var(--primary-color)' : 'transparent'};
+  color: ${props => props.$active ? 'white' : 'var(--text-secondary)'};
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
   
   &:hover {
-    background-color: ${props => props.$active ? 'var(--primary-color)' : 'var(--background-color)'};
+    border-color: var(--primary-color);
+    color: ${props => props.$active ? 'white' : 'var(--primary-color)'};
   }
 `;
 
 const MoodEntriesContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: var(--spacing-lg);
 `;
 
 const MoodEntryCard = styled(Card)`
-  transition: transform var(--transition-normal);
-  
+  padding: 0;
+  overflow: hidden;
+
   &:hover {
-    transform: translateY(-5px);
+    border-color: var(--primary-light);
   }
 `;
 
-const MoodLevel = styled.div`
+const EntryHeader = styled.div`
+  padding: var(--spacing-md);
+  background: rgba(99, 102, 241, 0.03);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .date {
+    font-weight: 700;
+    color: var(--text-color);
+  }
+`;
+
+const MoodBadge = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: ${props => props.$color || 'var(--primary-color)'};
+  color: white;
   display: flex;
   align-items: center;
-  margin-bottom: var(--spacing-md);
-  
-  span {
-    font-size: var(--font-size-xlarge);
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-right: var(--spacing-sm);
-  }
-  
-  p {
-    margin: 0;
-    color: var(--text-secondary);
-  }
+  justify-content: center;
+  font-weight: 800;
+  box-shadow: 0 4px 10px -2px ${props => props.$color}55;
 `;
 
-const MoodFactors = styled.div`
-  margin-bottom: var(--spacing-md);
+const EntryContent = styled.div`
+  padding: var(--spacing-md);
 `;
 
-const FactorTag = styled.span`
-  display: inline-block;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: var(--background-color);
-  border-radius: var(--border-radius-sm);
-  margin-right: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
-  font-size: var(--font-size-small);
+const TagGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--spacing-sm);
 `;
 
-const MoodActivities = styled.div`
-  margin-bottom: var(--spacing-md);
-`;
-
-const ActivityTag = styled.span`
-  display: inline-block;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background-color: rgba(0, 113, 227, 0.1);
-  color: var(--primary-color);
-  border-radius: var(--border-radius-sm);
-  margin-right: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
-  font-size: var(--font-size-small);
+const Tag = styled.span`
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  background: var(--background-color);
+  color: var(--text-secondary);
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  font-weight: 500;
 `;
 
 const MoodNotes = styled.p`
   color: var(--text-color);
-  margin-bottom: 0;
-  font-style: italic;
+  margin-top: var(--spacing-md);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+const ForecastGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ForecastCard = styled.div`
+  background: var(--card-background);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+  text-align: center;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-light);
+  }
+
+  h4 {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .score {
+    font-size: 2.5rem;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    background: var(--wellness-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-color);
+  }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
   padding: var(--spacing-xl);
+  background: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  border: 1px dashed var(--border-color);
   
-  h3 {
-    margin-bottom: var(--spacing-md);
-  }
-  
-  p {
-    margin-bottom: var(--spacing-lg);
+  i {
+    font-size: 3rem;
     color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
   }
 `;
 
 const LoadingState = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: var(--spacing-xl);
   color: var(--text-secondary);
+  gap: var(--spacing-md);
 `;
 
 const ErrorState = styled.div`
@@ -173,6 +280,7 @@ const ErrorState = styled.div`
 `;
 
 const MoodTracker = () => {
+  const navigate = useNavigate();
   const [moodEntries, setMoodEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [futurePrediction, setFuturePrediction] = useState(null);
@@ -301,6 +409,14 @@ const MoodTracker = () => {
     if (level >= 3) return 'Poor';
     return 'Very Poor';
   };
+
+  const getMoodColor = (level) => {
+    if (level >= 9) return '#10b981'; // emerald green
+    if (level >= 7) return '#6366f1'; // indigo
+    if (level >= 5) return '#f59e0b'; // amber
+    if (level >= 3) return '#f97316'; // orange
+    return '#ef4444';                 // red
+  };
   
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -337,123 +453,109 @@ const MoodTracker = () => {
             </Button>
           </EmptyState>
         ) : (
-          <>
-            <Card>
-              <FilterContainer>
-                <FilterButton 
-                  $active={timeFilter === 'week'} 
-                  onClick={() => setTimeFilter('week')}
-                >
-                  Last 7 Days
-                </FilterButton>
-                <FilterButton 
-                  $active={timeFilter === 'month'} 
-                  onClick={() => setTimeFilter('month')}
-                >
-                  Last 30 Days
-                </FilterButton>
-                <FilterButton 
-                  $active={timeFilter === 'quarter'} 
-                  onClick={() => setTimeFilter('quarter')}
-                >
-                  Last 90 Days
-                </FilterButton>
-                <FilterButton 
-                  $active={timeFilter === 'year'} 
-                  onClick={() => setTimeFilter('year')}
-                >
-                  Last Year
-                </FilterButton>
-                <FilterButton 
-                  $active={timeFilter === 'all'} 
-                  onClick={() => setTimeFilter('all')}
-                >
-                  All Time
-                </FilterButton>
-              </FilterContainer>
-              
-              <ChartContainer>
-                <Line data={chartData} options={chartOptions} />
-              </ChartContainer>
-            </Card>
+          <>            <PageHeader>
+              <PageHeaderInfo>
+                <PageTitle>Mood Journey</PageTitle>
+                <PageSubtitle>Reflect on your patterns and discover new insights.</PageSubtitle>
+              </PageHeaderInfo>
+              <Button onClick={() => navigate('/mood-tracker/new')}>
+                <i className="fas fa-plus" style={{ marginRight: '8px' }}></i> Log Today's Mood
+              </Button>
+            </PageHeader>
 
-            <h2 style={{ margin: 'var(--spacing-xl) 0 var(--spacing-md)' }}>Future Mood Analysis (LSTM Predicted)</h2>
-            <Card>
-              {predictLoading ? (
-                <LoadingState>Analyzing your history to forecast future mood...</LoadingState>
-              ) : futurePrediction ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-lg)' }}>
-                  <div style={{ textAlign: 'center', padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--background-color)' }}>
-                    <h5 style={{ color: 'var(--text-secondary)' }}>Tomorrow</h5>
-                    <h2 style={{ color: 'var(--primary-color)', margin: 'var(--spacing-sm) 0' }}>{futurePrediction.next_day?.score}/10</h2>
-                    <p style={{ margin: 0 }}>{futurePrediction.next_day?.label}</p>
-                  </div>
-                  <div style={{ textAlign: 'center', padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--background-color)' }}>
-                    <h5 style={{ color: 'var(--text-secondary)' }}>In 3 Days</h5>
-                    <h2 style={{ color: 'var(--primary-color)', margin: 'var(--spacing-sm) 0' }}>{futurePrediction['3_days']?.score}/10</h2>
-                    <p style={{ margin: 0 }}>{futurePrediction['3_days']?.label}</p>
-                  </div>
-                  <div style={{ textAlign: 'center', padding: 'var(--spacing-md)', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--background-color)' }}>
-                    <h5 style={{ color: 'var(--text-secondary)' }}>In 7 Days</h5>
-                    <h2 style={{ color: 'var(--primary-color)', margin: 'var(--spacing-sm) 0' }}>{futurePrediction['7_days']?.score}/10</h2>
-                    <p style={{ margin: 0 }}>{futurePrediction['7_days']?.label}</p>
-                  </div>
-                </div>
-              ) : (
-                <EmptyState>
-                  <p>Could not load future predictions at this time.</p>
-                </EmptyState>
-              )}
-            </Card>
+            <ChartSection>
+              <Card>
+                <ChartHeader>
+                  <SectionTitle>
+                    <i className="fas fa-chart-line"></i> Mood Trends
+                  </SectionTitle>
+                  <FilterContainer>
+                    {['week', 'month', 'quarter', 'all'].map(filter => (
+                      <FilterButton 
+                        key={filter}
+                        $active={timeFilter === filter}
+                        onClick={() => setTimeFilter(filter)}
+                      >
+                        {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                      </FilterButton>
+                    ))}
+                  </FilterContainer>
+                </ChartHeader>
+                <ChartContainer>
+                  <Line data={chartData} options={chartOptions} />
+                </ChartContainer>
+              </Card>
+            </ChartSection>
+
+            {/* Mood Forecast Section */}
+            <SectionTitle style={{ marginBottom: 'var(--spacing-md)' }}>
+              <i className="fas fa-magic"></i> AI Mood Forecast
+            </SectionTitle>
             
-            <h2 style={{ margin: 'var(--spacing-xl) 0 var(--spacing-md)' }}>Mood Entries</h2>
+            {predictLoading ? (
+              <Card>
+                <LoadingState>
+                  <i className="fas fa-spinner fa-spin fa-2x"></i>
+                  <p>Analyzing your emotional patterns...</p>
+                </LoadingState>
+              </Card>
+            ) : futurePrediction ? (
+              <ForecastGrid>
+                {['next_day', '3_days', '7_days'].map((key) => {
+                  const labelMap = { 'next_day': 'Tomorrow', '3_days': 'In 3 Days', '7_days': 'In 7 Days' };
+                  const data = futurePrediction[key];
+                  return (
+                    <ForecastCard key={key}>
+                      <h4>{labelMap[key]}</h4>
+                      <div className="score">{data?.score}</div>
+                      <div className="label">{data?.label}</div>
+                    </ForecastCard>
+                  );
+                })}
+              </ForecastGrid>
+            ) : (
+              <Card>
+                <EmptyState>
+                  <i className="fas fa-brain"></i>
+                  <p>Check back after adding more mood entries for a personalized AI forecast.</p>
+                </EmptyState>
+              </Card>
+            )}
+            
+            <SectionTitle style={{ margin: 'var(--spacing-xl) 0 var(--spacing-md)' }}>
+              <i className="fas fa-history"></i> Recent Entries
+            </SectionTitle>
             
             <MoodEntriesContainer>
               {filteredEntries.map(entry => (
                 <MoodEntryCard 
                   key={entry._id}
-                  title={formatDate(entry.date)}
                   $hoverable
                   $clickable
                   as={Link}
                   to={`/mood-tracker/${entry._id}`}
                 >
-                  <MoodLevel>
-                    <span>{entry.mood}/10</span>
-                    <p>{getMoodDescription(entry.mood)}</p>
-                  </MoodLevel>
+                  <EntryHeader>
+                    <span className="date">{formatDate(entry.date)}</span>
+                    <MoodBadge $color={getMoodColor(entry.mood)}>
+                      {entry.mood}
+                    </MoodBadge>
+                  </EntryHeader>
                   
-                  {entry.factors && entry.factors.length > 0 && (
-                    <MoodFactors>
-                      <h4>Factors:</h4>
-                      {entry.factors.map((factor, index) => (
-                        <FactorTag key={index}>
-                          {factor.factor} ({factor.impact}/5)
-                        </FactorTag>
-                      ))}
-                    </MoodFactors>
-                  )}
-                  
-                  {entry.activities && entry.activities.length > 0 && (
-                    <MoodActivities>
-                      <h4>Activities:</h4>
-                      {entry.activities.map((activity, index) => (
-                        <ActivityTag key={index}>{activity}</ActivityTag>
-                      ))}
-                    </MoodActivities>
-                  )}
-                  
-                  {entry.notes && (
-                    <>
-                      <h4>Notes:</h4>
-                      <MoodNotes>
-                        {entry.notes.length > 100 
-                          ? `${entry.notes.substring(0, 100)}...` 
-                          : entry.notes
-                        }
-                      </MoodNotes>
-                    </>
-                  )}
+                  <EntryContent>
+                    <p style={{ fontWeight: 600, color: 'var(--text-color)', marginBottom: '8px' }}>
+                      {getMoodDescription(entry.mood)}
+                    </p>
+                    
+                    <TagGroup>
+                      {entry.factors?.map((f, i) => <Tag key={i}>{f.factor}</Tag>)}
+                      {entry.activities?.map((a, i) => <Tag key={i} style={{ color: 'var(--primary-color)', background: 'rgba(99, 102, 241, 0.05)' }}>{a}</Tag>)}
+                    </TagGroup>
+                    
+                    {entry.notes && (
+                      <MoodNotes>{entry.notes}</MoodNotes>
+                    )}
+                  </EntryContent>
                 </MoodEntryCard>
               ))}
             </MoodEntriesContainer>

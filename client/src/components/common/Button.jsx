@@ -2,52 +2,59 @@ import styled, { css } from 'styled-components';
 
 const ButtonVariants = {
   primary: css`
-    background-color: var(--primary-color);
+    background: var(--wellness-gradient);
     color: white;
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
     
     &:hover {
-      background-color: var(--secondary-color);
+      background: var(--wellness-gradient);
+      filter: brightness(1.1);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+      transform: translateY(-2px);
     }
   `,
   secondary: css`
-    background-color: transparent;
+    background: transparent;
     color: var(--primary-color);
     border: 1px solid var(--primary-color);
     
     &:hover {
-      background-color: var(--background-color);
+      background: rgba(99, 102, 241, 0.05);
+      transform: translateY(-2px);
     }
   `,
   danger: css`
-    background-color: var(--error-color);
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
     color: white;
     
     &:hover {
-      background-color: #ff6961;
+      filter: brightness(1.1);
+      transform: translateY(-2px);
     }
   `,
   success: css`
-    background-color: var(--success-color);
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     color: white;
     
     &:hover {
-      background-color: #5ddc7a;
+      filter: brightness(1.1);
+      transform: translateY(-2px);
     }
   `
 };
 
 const ButtonSizes = {
   small: css`
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-small);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   `,
   medium: css`
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-medium);
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
   `,
   large: css`
-    padding: var(--spacing-md) var(--spacing-lg);
-    font-size: var(--font-size-large);
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
   `
 };
 
@@ -56,11 +63,13 @@ const StyledButton = styled.button`
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius-md);
-  font-weight: 500;
-  transition: all var(--transition-fast);
+  font-weight: 600;
+  font-family: var(--font-main);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: none;
   outline: none;
+  letter-spacing: -0.01em;
   
   ${props => ButtonVariants[props.$variant || 'primary']}
   ${props => ButtonSizes[props.$size || 'medium']}
@@ -70,13 +79,13 @@ const StyledButton = styled.button`
   `}
   
   ${props => props.disabled && css`
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
   `}
   
-  &:focus {
-    box-shadow: 0 0 0 2px var(--background-color), 0 0 0 4px var(--primary-color);
+  &:active {
+    transform: translateY(0) scale(0.98);
   }
 `;
 

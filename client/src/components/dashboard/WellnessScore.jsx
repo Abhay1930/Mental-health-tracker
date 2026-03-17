@@ -60,28 +60,31 @@ const ScoreCircle = styled.div`
   align-items: center;
   justify-content: center;
   position: relative;
+  box-shadow: var(--shadow-lg);
   
   &::before {
     content: '';
     position: absolute;
-    width: 70%;
-    height: 70%;
+    width: 82%;
+    height: 82%;
     border-radius: 50%;
     background-color: var(--card-background);
+    backdrop-filter: blur(4px);
   }
 `;
 
 const ScoreValue = styled.div`
   position: relative;
-  font-size: 2.5rem;
-  font-weight: 600;
+  font-size: 3.5rem;
+  font-weight: 800;
   color: var(--text-color);
+  font-family: var(--font-heading);
   z-index: 1;
 `;
 
 const ScoreFactors = styled.div`
   flex: 1;
-  margin-left: var(--spacing-lg);
+  margin-left: var(--spacing-xl);
   
   @media (max-width: 768px) {
     margin-left: 0;
@@ -90,91 +93,113 @@ const ScoreFactors = styled.div`
 `;
 
 const FactorsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const FactorItem = styled.div`
   display: flex;
-  align-items: center;
-  padding: var(--spacing-sm);
+  flex-direction: column;
+  padding: var(--spacing-md);
   background-color: var(--background-color);
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+  transition: transform var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+`;
+
+const FactorHeader = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
 `;
 
 const FactorIcon = styled.div`
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: ${props => props.$color || 'var(--primary-color)'};
+  background: ${props => props.$color || 'var(--primary-color)'};
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: var(--spacing-md);
-`;
-
-const FactorInfo = styled.div`
-  flex: 1;
+  margin-right: var(--spacing-sm);
+  font-size: 0.9rem;
+  box-shadow: 0 4px 10px -2px ${props => props.$color}55;
 `;
 
 const FactorName = styled.div`
-  font-weight: 500;
-  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-color);
 `;
 
 const FactorScore = styled.div`
   display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+  flex-direction: column;
+  gap: 6px;
 `;
 
 const FactorBar = styled.div`
-  flex: 1;
-  height: 6px;
+  height: 8px;
   background-color: var(--border-color);
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
 `;
 
 const FactorBarFill = styled.div`
   height: 100%;
   width: ${props => props.$value}%;
-  background-color: ${props => props.$color || 'var(--primary-color)'};
+  background: ${props => props.$color || 'var(--primary-color)'};
+  border-radius: 4px;
 `;
 
 const FactorValue = styled.div`
-  font-size: var(--font-size-small);
-  font-weight: 600;
-  color: ${props => props.$color || 'var(--primary-color)'};
-  width: 30px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-color);
   text-align: right;
 `;
 
 const DailyTip = styled.div`
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background-color: rgba(0, 113, 227, 0.1);
-  border-radius: var(--border-radius-md);
-  border-left: 4px solid var(--primary-color);
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: rgba(99, 102, 241, 0.05);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  position: relative;
 `;
 
 const TipTitle = styled.div`
-  font-weight: 600;
-  margin-bottom: var(--spacing-xs);
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
   display: flex;
   align-items: center;
+  color: var(--primary-color);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
   
   i {
     margin-right: var(--spacing-sm);
-    color: var(--primary-color);
+    font-size: 1rem;
   }
 `;
 
 const TipContent = styled.p`
   margin: 0;
-  font-size: var(--font-size-small);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-color);
 `;
 
 const LoadingState = styled.div`
@@ -359,18 +384,18 @@ const WellnessScore = () => {
             <FactorsList>
               {score.factors.map((factor, index) => (
                 <FactorItem key={index}>
-                  <FactorIcon $color={factor.color}>
-                    <i className={`fas fa-${factor.icon}`}></i>
-                  </FactorIcon>
-                  <FactorInfo>
+                  <FactorHeader>
+                    <FactorIcon $color={factor.color}>
+                      <i className={`fas fa-${factor.icon}`}></i>
+                    </FactorIcon>
                     <FactorName>{factor.name}</FactorName>
-                    <FactorScore>
-                      <FactorBar>
-                        <FactorBarFill $value={factor.value} $color={factor.color} />
-                      </FactorBar>
-                      <FactorValue $color={factor.color}>{factor.value}</FactorValue>
-                    </FactorScore>
-                  </FactorInfo>
+                  </FactorHeader>
+                  <FactorScore>
+                    <FactorBar>
+                      <FactorBarFill $value={factor.value} $color={factor.color} />
+                    </FactorBar>
+                    <FactorValue>{factor.value}%</FactorValue>
+                  </FactorScore>
                 </FactorItem>
               ))}
             </FactorsList>

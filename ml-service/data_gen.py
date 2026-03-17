@@ -3,58 +3,45 @@ import numpy as np
 from datetime import datetime, timedelta
 import os
 
-def generate_mood_data(num_rows=3000):
-    np.random.seed(42)
+def generate_data(n=2000):
+    start = datetime.now() - timedelta(days=n)
+    dates = [start + timedelta(days=i) for i in range(n)]
     
-    start_date = datetime.now() - timedelta(days=num_rows)
-    dates = [start_date + timedelta(days=i) for i in range(num_rows)]
+    # Feature generation
+    sleep = np.random.uniform(4, 10, n)
+    exercise = np.random.uniform(0, 90, n)
+    social = np.random.uniform(1, 10, n)
+    screen = np.random.uniform(2, 12, n)
+    sentiment = np.random.uniform(-1, 1, n)
     
-    # Base features
-    sleep_hours = np.random.uniform(4, 10, num_rows)
-    exercise_minutes = np.random.uniform(0, 90, num_rows)
-    social_interaction = np.random.uniform(1, 10, num_rows)
-    screen_time = np.random.uniform(2, 12, num_rows)
-    journal_sentiment = np.random.uniform(-1, 1, num_rows)
+    # Logic for synthetic correlation
+    stress = 10 - (sleep * 0.8) + (screen * 0.3) + np.random.normal(0, 1, n)
+    stress = np.clip(stress, 1, 10)
     
-    # Stress level (correrlated with sleep and screen time)
-    # Less sleep and more screen time = higher stress
-    stress_level = 10 - (sleep_hours * 0.8) + (screen_time * 0.3) + np.random.normal(0, 1, num_rows)
-    stress_level = np.clip(stress_level, 1, 10)
-    
-    # Mood score calculation with correlations
-    # Mood improves with: sleep, exercise, social, sentiment
-    # Mood declines with: stress
-    mood_score = (
-        (sleep_hours * 0.15) + 
-        (exercise_minutes * 0.02) + 
-        (social_interaction * 0.2) + 
-        (journal_sentiment * 1.5) - 
-        (stress_level * 0.3) + 
-        5 # base constant
+    mood = (
+        (sleep * 0.15) + (exercise * 0.02) + (social * 0.2) + 
+        (sentiment * 1.5) - (stress * 0.3) + 5
     )
+    mood = np.clip(mood + np.random.normal(0, 0.5, n), 1, 10)
     
-    # Add some randomness and clip to 1-10
-    mood_score += np.random.normal(0, 0.5, num_rows)
-    mood_score = np.clip(mood_score, 1, 10)
-    
-    df = pd.DataFrame({
+    return pd.DataFrame({
         'date': dates,
-        'sleep_hours': np.round(sleep_hours, 1),
-        'stress_level': np.round(stress_level, 1),
-        'exercise_minutes': np.round(exercise_minutes).astype(int),
-        'social_interaction_level': np.round(social_interaction, 1),
-        'screen_time_hours': np.round(screen_time, 1),
-        'journal_sentiment_score': np.round(journal_sentiment, 2),
-        'mood_score': np.round(mood_score, 1)
+        'sleep_hours': np.round(sleep, 1),
+        'stress_level': np.round(stress, 1),
+        'exercise_minutes': np.round(exercise).astype(int),
+        'social_interaction_level': np.round(social, 1),
+        'screen_time_hours': np.round(screen, 1),
+        'journal_sentiment_score': np.round(sentiment, 2),
+        'mood_score': np.round(mood, 1)
     })
-    
-    return df
 
 if __name__ == "__main__":
-    print("Generating synthetic mood data...")
-    df = generate_mood_data(5000)
-    base = os.path.dirname(os.path.abspath(__file__))
-    os.makedirs(os.path.join(base, 'data'), exist_ok=True)
-    out_path = os.path.join(base, 'data', 'synthetic_mood_data.csv')
-    df.to_csv(out_path, index=False)
-    print(f"Dataset saved to {out_path} ({len(df)} rows)")
+    count = 4000
+    df = generate_data(count)
+    
+    dir_path = os.path.join(os.path.dirname(__file__), 'data')
+    os.makedirs(dir_path, exist_ok=True)
+    
+    file_path = os.path.join(dir_path, 'synthetic_mood_data.csv')
+    df.to_csv(file_path, index=False)
+    print(f"Generated {count} samples in {file_path}")

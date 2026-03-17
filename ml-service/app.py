@@ -9,142 +9,121 @@ from tensorflow.keras.models import load_model
 app = Flask(__name__)
 CORS(app)
 
-# Load model on startup — use absolute path so this works from any CWD
+# Load model configurations
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(BASE_DIR, 'models', 'mood_model.joblib')
+
+def get_path(folder, filename):
+    return os.path.join(BASE_DIR, folder, filename)
+
+# Standard mood model
+model_path = get_path('models', 'mood_model.joblib')
 if os.path.exists(model_path):
-    model_data = joblib.load(model_path)
-    model = model_data['model']
-    features = model_data['features']
-    print("Mood prediction model loaded successfully.")
+    m_data = joblib.load(model_path)
+    model = m_data['model']
+    features = m_data['features']
+    print("Main model loaded.")
 else:
     model = None
-    print("Warning: Model file not found. Please run train.py first.")
 
-# Load LSTM model on startup
-lstm_model_path = os.path.join(BASE_DIR, 'models', 'lstm_mood_model.h5')
-lstm_scaler_path = os.path.join(BASE_DIR, 'models', 'lstm_scaler.joblib')
+# LSTM time-series model
+l_model_path = get_path('models', 'lstm_mood_model.h5')
+l_scaler_path = get_path('models', 'lstm_scaler.joblib')
 
-if os.path.exists(lstm_model_path) and os.path.exists(lstm_scaler_path):
-    lstm_model = load_model(lstm_model_path, compile=False)
-    lstm_data = joblib.load(lstm_scaler_path)
-    lstm_scaler = lstm_data['scaler']
-    lstm_features = lstm_data['features']
-    lstm_seq_length = lstm_data['seq_length']
-    print("LSTM mood prediction model loaded successfully.")
+if os.path.exists(l_model_path) and os.path.exists(l_scaler_path):
+    lstm_model = load_model(l_model_path, compile=False)
+    l_data = joblib.load(l_scaler_path)
+    lstm_scaler = l_data['scaler']
+    lstm_features = l_data['features']
+    lstm_seq_length = l_data['seq_length']
+    print("LSTM model loaded.")
 else:
     lstm_model = None
-    print("Warning: LSTM Model file not found. Please run train_lstm.py first.")
 
 @app.route('/predict-mood', methods=['POST'])
 def predict():
     if not model:
-        return jsonify({'error': 'Model not loaded'}), 500
+        return jsonify({'error': 'Model unavailable'}), 500
     
     try:
-        data = request.get_json()
-        
-        # Build a named DataFrame so sklearn doesn't emit feature_names warnings
+        req = request.json
+        # Feature mapping
         input_df = pd.DataFrame([{
-            'sleep_hours':              data.get('sleep_hours', 7),
-            'stress_level':             data.get('stress_level', 5),
-            'exercise_minutes':         data.get('exercise_minutes', 30),
-            'social_interaction_level': data.get('social_interaction_level', 5),
-            'screen_time_hours':        data.get('screen_time_hours', 4),
-            'journal_sentiment_score':  data.get('journal_sentiment_score', 0),
-            'prev_mood':                data.get('prev_mood', 5),
+            'sleep_hours':              req.get('sleep_hours', 7),
+            'stress_level':             req.get('stress_level', 5),
+            'exercise_minutes':         req.get('exercise_minutes', 30),
+            'social_interaction_level': req.get('social_interaction_level', 5),
+            'screen_time_hours':        req.get('screen_time_hours', 4),
+            'journal_sentiment_score':  req.get('journal_sentiment_score', 0),
+            'prev_mood':                req.get('prev_mood', 5),
         }])
         
-        prediction = model.predict(input_df)[0]
-        
-        # Determine confidence/insight
-        confidence = "high" if abs(prediction - 5) > 2 else "moderate"
+        pred = model.predict(input_df)[0]
+        conf = "high" if abs(pred - 5) > 2 else "moderate"
         
         return jsonify({
-            'predicted_mood': round(float(prediction), 1),
-            'confidence': confidence
+            'predicted_mood': round(float(pred), 1),
+            'confidence': conf
         })
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
 @app.route('/predict_future', methods=['POST'])
 def predict_future():
     if not lstm_model:
-        return jsonify({'error': 'LSTM Model not loaded'}), 500
+        return jsonify({'error': 'Prediction engine offline'}), 500
     
     try:
-        data = request.get_json()
-        history = data.get('history', [])
+        req = request.json
+        history = req.get('history', [])
         
         if len(history) < lstm_seq_length:
-            return jsonify({'error': f'Not enough history. Needed {lstm_seq_length} days.'}), 400
+            return jsonify({'error': 'Insufficient data history'}), 400
             
-        recent_history = history[-lstm_seq_length:]
-        
-        input_data = []
-        for day in recent_history:
-            day_features = [
-                day.get('sleep_hours', 7),
-                day.get('stress_level', 5),
-                day.get('exercise_minutes', 30),
-                day.get('social_interaction_level', 5),
-                day.get('screen_time_hours', 4),
-                day.get('journal_sentiment_score', 0),
-                day.get('mood_score', 5)
-            ]
-            input_data.append(day_features)
+        # Extract features for LSTM
+        inputs = []
+        for h in history[-lstm_seq_length:]:
+            inputs.append([
+                h.get('sleep_hours', 7),
+                h.get('stress_level', 5),
+                h.get('exercise_minutes', 30),
+                h.get('social_interaction_level', 5),
+                h.get('screen_time_hours', 4),
+                h.get('journal_sentiment_score', 0),
+                h.get('mood_score', 5)
+            ])
             
-        input_data = np.array(input_data)
-        scaled_input = lstm_scaler.transform(input_data)
-        X = scaled_input.reshape(1, lstm_seq_length, len(lstm_features))
+        X = np.array(inputs)
+        X_scaled = lstm_scaler.transform(X).reshape(1, lstm_seq_length, len(lstm_features))
         
-        # Predict using the LSTM (outputs normalized values)
-        prediction_scaled = lstm_model.predict(X, verbose=0)[0] 
+        # Raw tensor prediction
+        y_scaled = lstm_model.predict(X_scaled, verbose=0)[0] 
         
-        # We need to inverse transform the predicted mood scores
-        # We'll create a dummy array with 7 columns (matching the feature dimension)
-        # to correctly "inverse transform" just the mood score.
-        dummy_row = np.zeros(len(lstm_features))
+        # Inverse transform logic
+        def unscale(val):
+            row = np.zeros(len(lstm_features))
+            row[-1] = val
+            return lstm_scaler.inverse_transform([row])[0][-1]
+
+        preds = [np.clip(unscale(v), 1, 10) for v in y_scaled]
         
-        unscaled_predictions = []
-        for p_scaled in prediction_scaled:
-            dummy_row[-1] = p_scaled # Put the scaled prediction into the mood_score column
-            unscaled_val = lstm_scaler.inverse_transform([dummy_row])[0][-1]
-            unscaled_predictions.append(unscaled_val)
-            
-        prediction = np.array(unscaled_predictions)
-        prediction = np.clip(prediction, 1, 10)
-        
-        def mood_label(score):
-            if score >= 8: return "Excellent"
-            if score >= 6.5: return "Good"
-            if score >= 4.5: return "Neutral"
-            if score >= 3: return "Poor"
+        def label(v):
+            if v >= 8: return "Excellent"
+            if v >= 6.5: return "Good"
+            if v >= 4.5: return "Neutral"
+            if v >= 3: return "Poor"
             return "Terrible"
             
         return jsonify({
-            'next_day': {
-                'score': round(float(prediction[0]), 1),
-                'label': mood_label(prediction[0])
-            },
-            '3_days': {
-                'score': round(float(prediction[1]), 1),
-                'label': mood_label(prediction[1])
-            },
-            '7_days': {
-                'score': round(float(prediction[2]), 1),
-                'label': mood_label(prediction[2])
-            }
+            'next_day': {'score': round(float(preds[0]), 1), 'label': label(preds[0])},
+            '3_days':   {'score': round(float(preds[1]), 1), 'label': label(preds[1])},
+            '7_days':   {'score': round(float(preds[2]), 1), 'label': label(preds[2])}
         })
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'healthy', 'model_loaded': model is not None})
+    return jsonify({'status': 'online', 'models': {'base': model is not None, 'lstm': lstm_model is not None}})
 
 if __name__ == '__main__':
-    # Using port 5005 to avoid collisions
-    app.run(host='0.0.0.0', port=5006, debug=False)
+    app.run(host='0.0.0.0', port=5006)

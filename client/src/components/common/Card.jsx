@@ -2,25 +2,38 @@ import styled from 'styled-components';
 
 const StyledCard = styled.div.withConfig({
   shouldForwardProp: (prop) => 
-    !['hoverable', 'clickable', 'isOpen', 'active', 'completed', 'progress', 'category', 'isPrivate', 'selected', 'checked'].includes(prop)
+    !['hoverable', 'clickable', 'glass', 'isOpen', 'active', 'completed', 'progress', 'category', 'isPrivate', 'selected', 'checked'].includes(prop)
 })`
   background-color: var(--card-background);
   border-radius: var(--border-radius-lg);
-  box-shadow: 0 4px 6px var(--shadow-color);
-  padding: ${props => props.$padding || 'var(--spacing-lg)'};
-  margin-bottom: ${props => props.$marginBottom || 'var(--spacing-lg)'};
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  padding: ${props => props.$padding || 'var(--spacing-md)'};
+  margin-bottom: ${props => props.$marginBottom || 'var(--spacing-md)'};
   width: ${props => props.$width || '100%'};
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transition: all var(--transition-normal);
+  overflow: hidden;
   
+  ${props => props.$glass && `
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+  `}
+
   ${props => props.$hoverable && `
     &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 20px var(--shadow-color);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--primary-light);
     }
   `}
   
   ${props => props.$clickable && `
     cursor: pointer;
+    &:active {
+      transform: translateY(-2px);
+    }
   `}
 `;
 

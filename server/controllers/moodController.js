@@ -102,64 +102,49 @@ exports.deleteMood = async (req, res) => {
 
 exports.getPrediction = async (req, res) => {
   try {
-    console.log('Prediction requested for user:', req.user.id);
     const moods = await Mood.find({ user: req.user.id }).sort({ date: -1 }).limit(1);
-    const lastMood = moods.length > 0 ? moods[0] : null;
+    const last = moods[0];
 
-    console.log('Last mood entry:', lastMood ? 'found' : 'not found, using defaults');
-
-    const predictionData = {
-      sleep_hours: lastMood?.sleepHours || 7,
-      stress_level: lastMood?.anxiety || 5,
-      exercise_minutes: lastMood?.physicalActivity || 30,
-      social_interaction_level: lastMood?.socialInteraction || 5,
+    const payload = {
+      sleep_hours: last?.sleepHours || 7,
+      stress_level: last?.anxiety || 5,
+      exercise_minutes: last?.physicalActivity || 30,
+      social_interaction_level: last?.socialInteraction || 5,
       screen_time_hours: 4,
       journal_sentiment_score: 0,
-      prev_mood: lastMood?.mood || 5
+      prev_mood: last?.mood || 5
     };
 
     const response = await fetch('http://127.0.0.1:5006/predict-mood', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(predictionData)
+      body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      throw new Error('ML Service unreachable');
-    }
-
-    const result = await response.json();
-    res.json(result);
+    if (!response.ok) throw new Error('ML Service Error');
+    res.json(await response.json());
   } catch (err) {
-    console.error('Prediction Error:', err.message);
-    res.status(500).json({ msg: "Prediction service currently unavailable" });
+    console.error('Mood Prediction failed:', err.message);
+    res.status(503).json({ msg: "Service unavailable" });
   }
 };
 
 exports.getFuturePrediction = async (req, res) => {
   try {
-    console.log('Future prediction requested for user:', req.user.id);
+    const rawMoods = await Mood.find({ user: req.user.id }).sort({ date: -1 }).limit(7);
     
-    // Get last 7 days of mood data
-    const moods = await Mood.find({ user: req.user.id })
-                            .sort({ date: -1 })
-                            .limit(7);
-                            
-    // If not enough history, generate defaults backwards to reach 7 sequence elements
-    let history = [];
-    if (moods.length > 0) {
-      history = moods.reverse().map(m => ({
-        sleep_hours: m.sleepHours || 7,
-        stress_level: m.anxiety || 5,
-        exercise_minutes: m.physicalActivity || 30,
-        social_interaction_level: m.socialInteraction || 5,
-        screen_time_hours: 4,
-        journal_sentiment_score: 0,
-        mood_score: m.mood || 5
-      }));
-    }
+    // Reverse and map to feature format
+    let history = rawMoods.reverse().map(m => ({
+      sleep_hours: m.sleepHours || 7,
+      stress_level: m.anxiety || 5,
+      exercise_minutes: m.physicalActivity || 30,
+      social_interaction_level: m.socialInteraction || 5,
+      screen_time_hours: 4,
+      journal_sentiment_score: 0,
+      mood_score: m.mood || 5
+    }));
     
-    // Pad to 7 days if user is new or has fewer logs
+    // Ensure we have exactly 7 entries
     while (history.length < 7) {
       history.unshift({
         sleep_hours: 7,
@@ -172,24 +157,16 @@ exports.getFuturePrediction = async (req, res) => {
       });
     }
 
-    const payload = { history: history };
-
     const response = await fetch('http://127.0.0.1:5006/predict_future', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ history })
     });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Flask API error response:", errorText);
-        throw new Error('ML Service prediction failed');
-    }
-
-    const result = await response.json();
-    res.json(result);
+    if (!response.ok) throw new Error('Forecast failed');
+    res.json(await response.json());
   } catch (err) {
-    console.error('Future Prediction Error:', err.message);
-    res.status(500).json({ msg: "Future prediction service currently unavailable" });
+    console.error('Future Prediction failed:', err.message);
+    res.status(503).json({ msg: "Forecasting unavailable" });
   }
 };

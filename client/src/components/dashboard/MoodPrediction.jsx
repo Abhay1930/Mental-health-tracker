@@ -11,45 +11,64 @@ const PredictionContainer = styled.div`
 `;
 
 const ScoreCircle = styled.div`
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  background: var(--gradient-primary);
+  background: var(--wellness-gradient);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   color: white;
-  margin-bottom: var(--spacing-md);
-  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+  border: 4px solid rgba(255, 255, 255, 0.2);
 
   span.score {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: var(--font-heading);
   }
 
   span.label {
-    font-size: 0.8rem;
+    font-size: 0.875rem;
+    font-weight: 500;
     opacity: 0.9;
+    margin-top: 4px;
   }
 `;
 
 const InsightBox = styled.div`
   background: var(--background-color);
   padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  border-left: 4px solid var(--primary-color);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
   width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--wellness-gradient);
+  }
 
   h4 {
     margin-bottom: var(--spacing-xs);
     color: var(--text-color);
+    font-size: 1.1rem;
   }
 
   p {
     color: var(--text-secondary);
-    font-size: var(--font-size-small);
-    line-height: 1.4;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
   }
 `;
 
