@@ -115,7 +115,8 @@ exports.getPrediction = async (req, res) => {
       prev_mood: last?.mood || 5
     };
 
-    const response = await fetch('http://127.0.0.1:5006/predict-mood', {
+    const ML_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:5006';
+    const response = await fetch(`${ML_URL}/predict-mood`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -157,7 +158,8 @@ exports.getFuturePrediction = async (req, res) => {
       });
     }
 
-    const response = await fetch('http://127.0.0.1:5006/predict_future', {
+    const ML_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:5006';
+    const response = await fetch(`${ML_URL}/predict_future`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ history })
