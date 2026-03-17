@@ -286,6 +286,7 @@ const MoodTracker = () => {
   const [timeFilter, setTimeFilter] = useState('week');
   const [loading, setLoading] = useState(true);
   const [predictLoading, setPredictLoading] = useState(false);
+  const [predictError, setPredictError] = useState(null);
   const [error, setError] = useState(null);
   
   useEffect(() => {
@@ -307,10 +308,13 @@ const MoodTracker = () => {
     const fetchFuturePrediction = async () => {
       try {
         setPredictLoading(true);
+        setPredictError(null);
         const response = await moodApi.getFuturePrediction();
         setFuturePrediction(response.data);
       } catch (err) {
         console.error('Error fetching future prediction:', err);
+        const errMsg = err.response?.data?.error || err.message;
+        setPredictError(errMsg);
       } finally {
         setPredictLoading(false);
       }
@@ -496,7 +500,26 @@ const MoodTracker = () => {
                 <LoadingState>
                   <i className="fas fa-spinner fa-spin fa-2x"></i>
                   <p>Analyzing your emotional patterns...</p>
+                  <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+                    This might take up to 30 seconds as the AI service wakes up.
+                  </p>
                 </LoadingState>
+              </Card>
+            ) : predictError ? (
+              <Card style={{ borderColor: 'var(--error-light)', background: 'rgba(239, 68, 68, 0.02)' }}>
+                <EmptyState>
+                  <i className="fas fa-exclamation-triangle" style={{ color: 'var(--error-color)' }}></i>
+                  <p style={{ color: 'var(--error-color)', fontWeight: 600 }}>Mood Forecast Unavailable</p>
+                  <p style={{ fontSize: '0.9rem' }}>{predictError}</p>
+                  <Button 
+                    outline 
+                    size="small" 
+                    onClick={() => window.location.reload()}
+                    style={{ marginTop: '12px' }}
+                  >
+                    Try Again
+                  </Button>
+                </EmptyState>
               </Card>
             ) : futurePrediction ? (
               <ForecastGrid>

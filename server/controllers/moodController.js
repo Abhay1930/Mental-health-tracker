@@ -116,17 +116,40 @@ exports.getPrediction = async (req, res) => {
     };
 
     const ML_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:5006';
-    const response = await fetch(`${ML_URL}/predict-mood`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
-    if (!response.ok) throw new Error('ML Service Error');
-    res.json(await response.json());
+    try {
+      const response = await fetch(`${ML_URL}/predict-mood`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'ML Service Error');
+      }
+      
+      res.json(await response.json());
+    } catch (fetchErr) {
+      if (fetchErr.name === 'AbortError') {
+        throw new Error('ML Service request timed out');
+      }
+      throw fetchErr;
+    }
   } catch (err) {
     console.error('Mood Prediction failed:', err.message);
-    res.status(503).json({ msg: "Service unavailable" });
+    res.status(503).json({ 
+      msg: "Service unavailable", 
+      error: err.message,
+      tip: "If this is the first use, the AI service might be waking up. Please try again in 30 seconds."
+    });
   }
 };
 
@@ -159,16 +182,39 @@ exports.getFuturePrediction = async (req, res) => {
     }
 
     const ML_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:5006';
-    const response = await fetch(`${ML_URL}/predict_future`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ history })
-    });
+    
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
-    if (!response.ok) throw new Error('Forecast failed');
-    res.json(await response.json());
+    try {
+      const response = await fetch(`${ML_URL}/predict_future`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ history }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Forecast failed');
+      }
+
+      res.json(await response.json());
+    } catch (fetchErr) {
+      if (fetchErr.name === 'AbortError') {
+        throw new Error('Forecasting request timed out');
+      }
+      throw fetchErr;
+    }
   } catch (err) {
     console.error('Future Prediction failed:', err.message);
-    res.status(503).json({ msg: "Forecasting unavailable" });
+    res.status(503).json({ 
+      msg: "Forecasting unavailable",
+      error: err.message,
+      tip: "The AI service is currently spinning up. Please wait 30 seconds and refresh."
+    });
   }
 };
